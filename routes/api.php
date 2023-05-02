@@ -1,6 +1,10 @@
 <?php
 
-use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\LogoutController;
+use App\Http\Controllers\Auth\MeController;
+use App\Http\Controllers\Auth\RefreshController;
+use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\UsersController;
 use Illuminate\Support\Facades\Route;
 
@@ -17,11 +21,11 @@ Route::group(['prefix' => 'users'], function ($router) {
 });
 
 Route::group(['prefix' => 'auth'], function () {
-    Route::controller(AuthController::class)->group(function () {
-        Route::post('/register', 'register');
-        Route::post('/login', 'login');
-        Route::get('/me', 'me');
-        Route::post('/refresh', 'refresh');
-        Route::post('/logout', 'logout');
+    Route::post('/register', [RegisterController::class, 'register']);
+    Route::post('/login', [LoginController::class, 'login']);
+    Route::middleware('auth:api')->group(function () {
+        Route::get('/me', [MeController::class, 'me']);
+        Route::post('/refresh', [RefreshController::class, 'refresh']);
+        Route::post('/logout', [LogoutController::class, 'logout']);
     });
 });
