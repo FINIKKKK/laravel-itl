@@ -1,14 +1,15 @@
 <?php
 
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\MailController;
+use App\Http\Controllers\UsersController;
+use App\Http\Controllers\Auth\MeController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\LogoutController;
-use App\Http\Controllers\Auth\MeController;
 use App\Http\Controllers\Auth\RefreshController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Company\CreateController;
 use App\Http\Controllers\Company\GetAllController;
-use App\Http\Controllers\UsersController;
-use Illuminate\Support\Facades\Route;
 
 Route::group(['prefix' => 'users'], function ($router) {
     Route::get('/', [UsersController::class, 'getAll'])->name('getAll');
@@ -30,3 +31,6 @@ Route::group(['prefix' => 'companies'], function () {
         Route::post('/', [CreateController::class, 'create']);
     });
 });
+
+// Route::get('/send-email', [MailController::class, 'sendEmail']);
+Route::get('/send-email', [MailController::class, 'sendEmail']);
