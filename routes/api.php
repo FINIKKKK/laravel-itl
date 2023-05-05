@@ -5,16 +5,10 @@ use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\Auth\MeController;
 use App\Http\Controllers\Auth\RefreshController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\Company\CreateController;
+use App\Http\Controllers\Company\GetAllController;
 use App\Http\Controllers\UsersController;
 use Illuminate\Support\Facades\Route;
-
-// Route::group(['middleware' => 'api', 'prefix' => 'auth'], function ($router) {
-//     Route::post('/register', [AuthController::class, 'register'])->name('register');
-//     Route::post('/login', [AuthController::class, 'login'])->name('login');
-//     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-//     Route::get('/me', [AuthController::class, 'me'])->name('me');
-//     Route::post('/refresh', [AuthController::class, 'refresh'])->name('refresh');
-// });
 
 Route::group(['prefix' => 'users'], function ($router) {
     Route::get('/', [UsersController::class, 'getAll'])->name('getAll');
@@ -27,5 +21,12 @@ Route::group(['prefix' => 'auth'], function () {
         Route::get('/me', [MeController::class, 'me']);
         Route::post('/refresh', [RefreshController::class, 'refresh']);
         Route::post('/logout', [LogoutController::class, 'logout']);
+    });
+});
+
+Route::group(['prefix' => 'companies'], function () {
+    Route::get('/', [GetAllController::class, 'getAll']);
+    Route::middleware('auth:api')->group(function () {
+        Route::post('/', [CreateController::class, 'create']);
     });
 });
