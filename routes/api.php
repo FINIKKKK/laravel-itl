@@ -4,10 +4,7 @@ use App\Http\Controllers\MailController;
 use App\Http\Controllers\UsersController;
 use Illuminate\Support\Facades\Route;
 
-Route::group(['prefix' => 'users'], function ($router) {
-    Route::get('/', [UsersController::class, 'getAll'])->name('getAll');
-});
-
+// Auth Routes ##########################
 Route::namespace('App\Http\Controllers\Auth')->group(function () {
     Route::prefix('auth')->group(function () {
         Route::post('/register', 'RegisterController@register');
@@ -21,6 +18,12 @@ Route::namespace('App\Http\Controllers\Auth')->group(function () {
 });
 Route::get('/send-email', [MailController::class, 'sendEmail']);
 
+// Users Routes ##########################
+Route::group(['prefix' => 'users'], function ($router) {
+    Route::get('/', [UsersController::class, 'getAll'])->name('getAll');
+});
+
+// Companies Routes ##########################
 Route::namespace('App\Http\Controllers\Company')->group(function () {
     Route::prefix('companies')->group(function () {
         Route::get('/', 'GetAllController@getAll');
@@ -31,10 +34,23 @@ Route::namespace('App\Http\Controllers\Company')->group(function () {
     });
 });
 
+// Posts Routes ##########################
 Route::namespace('App\Http\Controllers\Post')->group(function () {
     Route::prefix('posts')->group(function () {
         Route::get('/', 'GetAllController@getAll');
         Route::get('/{id}', 'GetOneController@getOne');
+        Route::middleware('auth:api')->group(function () {
+            Route::post('/', 'CreateController@create');
+            Route::patch('/{id}', 'UpdateController@update');
+            Route::delete('/{id}', 'DeleteController@delete');
+        });
+    });
+});
+
+// Comments Routes ##########################
+Route::namespace('App\Http\Controllers\Comment')->group(function () {
+    Route::prefix('comments')->group(function () {
+        Route::get('/', 'GetAllController@getAll');
         Route::middleware('auth:api')->group(function () {
             Route::post('/', 'CreateController@create');
             Route::patch('/{id}', 'UpdateController@update');
