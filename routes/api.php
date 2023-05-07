@@ -1,36 +1,44 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\MailController;
 use App\Http\Controllers\UsersController;
-use App\Http\Controllers\Auth\MeController;
-use App\Http\Controllers\Auth\LoginController;
-use App\Http\Controllers\Auth\LogoutController;
-use App\Http\Controllers\Auth\RefreshController;
-use App\Http\Controllers\Auth\RegisterController;
-use App\Http\Controllers\Company\CreateController;
-use App\Http\Controllers\Company\GetAllController;
+use Illuminate\Support\Facades\Route;
 
 Route::group(['prefix' => 'users'], function ($router) {
     Route::get('/', [UsersController::class, 'getAll'])->name('getAll');
 });
 
-Route::group(['prefix' => 'auth'], function () {
-    Route::post('/register', [RegisterController::class, 'register']);
-    Route::post('/login', [LoginController::class, 'login']);
-    Route::middleware('auth:api')->group(function () {
-        Route::get('/me', [MeController::class, 'me']);
-        Route::post('/refresh', [RefreshController::class, 'refresh']);
-        Route::post('/logout', [LogoutController::class, 'logout']);
+Route::namespace('App\Http\Controllers\Auth')->group(function () {
+    Route::prefix('auth')->group(function () {
+        Route::post('/register', 'RegisterController@register');
+        Route::post('/login', 'LoginController@login');
+        Route::middleware('auth:api')->group(function () {
+            Route::get('/me', 'MeController@me');
+            Route::post('/refresh', 'RefreshController@refresh');
+            Route::post('/logout', 'LogoutController@logout');
+        });
     });
 });
-
-Route::group(['prefix' => 'companies'], function () {
-    Route::get('/', [GetAllController::class, 'getAll']);
-    Route::middleware('auth:api')->group(function () {
-        Route::post('/', [CreateController::class, 'create']);
-    });
-});
-
-// Route::get('/send-email', [MailController::class, 'sendEmail']);
 Route::get('/send-email', [MailController::class, 'sendEmail']);
+
+Route::namespace('App\Http\Controllers\Company')->group(function () {
+    Route::prefix('companies')->group(function () {
+        Route::get('/', 'GetAllController@getAll');
+        Route::middleware('auth:api')->group(function () {
+            Route::post('/', 'CreateController@create');
+            Route::get('/mine', 'MineController@mine');
+        });
+    });
+});
+
+Route::namespace('App\Http\Controllers\Post')->group(function () {
+    Route::prefix('posts')->group(function () {
+        Route::get('/', 'GetAllController@getAll');
+        Route::get('/{id}', 'GetOneController@getOne');
+        Route::middleware('auth:api')->group(function () {
+            Route::post('/', 'CreateController@create');
+            Route::patch('/{id}', 'UpdateController@update');
+            Route::delete('/{id}', 'DeleteController@delete');
+        });
+    });
+});
