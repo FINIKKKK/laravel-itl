@@ -8,11 +8,14 @@ use Illuminate\Http\Request;
 
 class GetAllController extends Controller {
     public function getAll(Request $req) {
-        if ($req->post_id) {
-            $comments = Comment::where('post_id', $req->post_id)->get();
-        } else {
-            $comments = Comment::all();
+        $comments = Comment::whereNull('comment_id')->where('post_id', $req->post_id)->with('user')
+            ->orderBy('created_at', 'desc')->get();
+
+        foreach ($comments as $comment) {
+            $children = Comment::where('comment_id', $comment->id)->with('user')->get();
+            $comment->children = $children;
         }
+
         return $comments;
     }
 }

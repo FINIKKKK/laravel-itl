@@ -12,7 +12,8 @@ class CreateController extends Controller {
     public function create(Request $req) {
         $validator = Validator::make($req->all(), [
             'text' => ['required', 'string', 'max:250'],
-            'post_id' => ['required', 'integer'],
+            'post_id' => ['integer'],
+            'reply_id' => ['integer'],
         ]);
         if ($validator->fails()) {
             return response()->json(['message' => $validator->errors()], 400);
@@ -28,7 +29,9 @@ class CreateController extends Controller {
             'text' => $req->text,
             'post_id' => $req->post_id,
             'user_id' => $user->id,
+            'comment_id' => $req->reply_id,
         ]);
+        $comment->load('user');
         return $comment;
     }
 }
