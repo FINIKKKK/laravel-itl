@@ -1,8 +1,9 @@
 <?php
 
+use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\MailController;
 use App\Http\Controllers\UsersController;
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\UploadFileController;
 
 // Auth Routes ##########################
 Route::namespace('App\Http\Controllers\Auth')->group(function () {
@@ -58,3 +59,6 @@ Route::namespace('App\Http\Controllers\Comment')->group(function () {
         });
     });
 });
+
+// Upload File ##########################
+Route::post('/upload', [UploadFileController::class, 'upload']);
