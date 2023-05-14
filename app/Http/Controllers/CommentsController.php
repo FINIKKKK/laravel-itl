@@ -1,14 +1,16 @@
 <?php
 
-namespace App\Http\Controllers\Comment;
+namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Models\Comment;
 use App\Models\Post;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
-class CreateController extends Controller {
+class CommentsController extends Controller
+{
+
     public function create(Request $req) {
         $validator = Validator::make($req->all(), [
             'text' => ['required', 'string', 'max:250'],
@@ -33,5 +35,31 @@ class CreateController extends Controller {
         ]);
         $comment->load('user');
         return $comment;
+    }
+
+
+    public function getAll(Request $req) {
+        $comments = Comment::whereNull('comment_id')->where('post_id', $req->post_id)->with('user')
+            ->orderBy('created_at', 'desc')->get();
+
+        foreach ($comments as $comment) {
+            $children = Comment::where('comment_id', $comment->id)->with('user')->get();
+            $comment->children = $children;
+        }
+
+        return $comments;
+    }
+
+
+    public function update(Request $req, $id) {
+        $comment = Comment::findOrFail($id);
+        $comment->update($req->all());
+        return $comment;
+    }
+
+    public function delete($id) {
+        $comment = Comment::findOrFail($id);
+        $comment->delete();
+        return 'Комментарий успешно удален';
     }
 }

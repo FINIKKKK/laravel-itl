@@ -1,64 +1,159 @@
 <?php
 
+use App\Http\Controllers\CommentsController;
+use App\Http\Controllers\CompaniesController;
+use App\Http\Controllers\PostsController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\MailController;
 use App\Http\Controllers\UsersController;
 use App\Http\Controllers\UploadFileController;
+use App\Http\Controllers\AuthController;
 
-// Auth Routes ##########################
-Route::namespace('App\Http\Controllers\Auth')->group(function () {
-    Route::prefix('auth')->group(function () {
-        Route::post('/register', 'RegisterController@register');
-        Route::post('/login', 'LoginController@login');
-        Route::middleware('auth:api')->group(function () {
-            Route::get('/me', 'MeController@me');
-            Route::post('/refresh', 'RefreshController@refresh');
-            Route::post('/logout', 'LogoutController@logout');
+
+/*
+|--------------------------------------------------------------------------
+| Авторизация и регистрация
+|--------------------------------------------------------------------------
+*/
+Route::controller(AuthController::class)
+    ->prefix('auth')
+    ->name('auth.')
+    ->group(callback: function () {
+        /**
+         * Регистрация нового пользователя
+         */
+        Route::name('register')->post('/register', 'register');
+
+        /**
+         * Вход в аккаунт
+         */
+        Route::name('login')->post('/login', 'login');
+
+        // Группа маршрутов, требующих аутентификации
+        Route::middleware('auth')->group(function () {
+            /**
+             * Выход из аккаунта
+             */
+            Route::name('logout')->post('/logout', 'logout');
+
+            /**
+             * Возвращение информациюи о текущем пользователе
+             */
+            Route::name('me')->get('/me', 'me');
         });
     });
-});
-Route::get('/send-email', [MailController::class, 'sendEmail']);
 
-// Users Routes ##########################
-Route::group(['prefix' => 'users'], function ($router) {
-    Route::get('/', [UsersController::class, 'getAll'])->name('getAll');
-});
 
-// Companies Routes ##########################
-Route::namespace('App\Http\Controllers\Company')->group(function () {
-    Route::prefix('companies')->group(function () {
-        Route::get('/', 'GetAllController@getAll');
-        Route::middleware('auth:api')->group(function () {
-            Route::post('/', 'CreateController@create');
-            Route::get('/mine', 'MineController@mine');
+/*
+|--------------------------------------------------------------------------
+| Пользователи
+|--------------------------------------------------------------------------
+*/
+Route::controller(UsersController::class)
+    ->prefix('users')
+    ->name('users.')
+    ->group(callback: function () {
+        /**
+         * Получение всех пользователей
+         */
+        Route::name('getAll')->get('/', 'getAll');
+    });
+
+
+/*
+|--------------------------------------------------------------------------
+| Компании
+|--------------------------------------------------------------------------
+*/
+Route::controller(CompaniesController::class)
+    ->prefix('companies')
+    ->name('companies.')
+    ->group(callback: function () {
+        /**
+         * Получение всех компаний
+         */
+        Route::name('getAll')->get('/', 'getAll');
+
+        // Группа маршрутов, требующих аутентификации
+        Route::middleware('auth')->group(function () {
+            /**
+             * Создание новой компании
+             */
+            Route::name('create')->post('/', 'create');
         });
     });
-});
 
-// Posts Routes ##########################
-Route::namespace('App\Http\Controllers\Post')->group(function () {
-    Route::prefix('posts')->group(function () {
-        Route::get('/', 'GetAllController@getAll');
-        Route::get('/{id}', 'GetOneController@getOne');
-        Route::middleware('auth:api')->group(function () {
-            Route::post('/', 'CreateController@create');
-            Route::patch('/{id}', 'UpdateController@update');
-            Route::delete('/{id}', 'DeleteController@delete');
+/*
+|--------------------------------------------------------------------------
+| Посты
+|--------------------------------------------------------------------------
+*/
+Route::controller(PostsController::class)
+    ->prefix('posts')
+    ->name('posts.')
+    ->group(callback: function () {
+        /**
+         * Получение всех постов
+         */
+        Route::name('getAll')->post('/', 'getAll');
+
+        /**
+         * Получение поста по id
+         */
+        Route::name('getOne')->post('/{id}', 'getOne');
+
+        // Группа маршрутов, требующих аутентификации
+        Route::middleware('auth')->group(function () {
+            /**
+             * Создание нового поста
+             */
+            Route::name('create')->post('/', 'create');
+
+            /**
+             * Обновление поста по id
+             */
+            Route::name('update')->patch('/{id}', 'update');
+
+            /**
+             * Удаление поста по id
+             */
+            Route::name('delete')->delete('/{id}', 'delete');
         });
     });
-});
 
-// Comments Routes ##########################
-Route::namespace('App\Http\Controllers\Comment')->group(function () {
-    Route::prefix('comments')->group(function () {
-        Route::get('/', 'GetAllController@getAll');
-        Route::middleware('auth:api')->group(function () {
-            Route::post('/', 'CreateController@create');
-            Route::patch('/{id}', 'UpdateController@update');
-            Route::delete('/{id}', 'DeleteController@delete');
+
+/*
+|--------------------------------------------------------------------------
+| Комментарии
+|--------------------------------------------------------------------------
+*/
+Route::controller(CommentsController::class)
+    ->prefix('comments')
+    ->name('comments.')
+    ->group(callback: function () {
+        /**
+         * Получение всех комментариев
+         */
+        Route::name('getAll')->post('/', 'getAll');
+
+        // Группа маршрутов, требующих аутентификации
+        Route::middleware('auth')->group(function () {
+            /**
+             * Создание нового комментария
+             */
+            Route::name('create')->post('/', 'create');
+
+            /**
+             * Обновление комментария по id
+             */
+            Route::name('update')->patch('/{id}', 'update');
+
+            /**
+             * Удаление комментария по id
+             */
+            Route::name('delete')->delete('/{id}', 'delete');
         });
     });
-});
 
-// Upload File ##########################
+
+// Загрузка файлов
 Route::post('/upload', [UploadFileController::class, 'upload']);
