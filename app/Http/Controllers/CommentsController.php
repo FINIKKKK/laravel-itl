@@ -14,29 +14,45 @@ class CommentsController extends Controller
      * Создание комментария
      */
     public function create(Request $req) {
-        $validator = Validator::make($req->all(), [
-            'text' => ['required', 'string', 'max:250'],
-            'post_id' => ['integer'],
-            'reply_id' => ['integer'],
-        ]);
-        if ($validator->fails()) {
-            return response()->json(['message' => $validator->errors()], 400);
-        }
-
-        $post = Post::findOrFail($req->post_id);
+        // Получаем пост по id
+        $post = Post::find($id);
+        // Проверяем есть ли пост
         if (!$post) {
-            return response()->json(['message' => 'Пост не найден'], 400);
+            return response()->json([
+                'status' => config('app.error_status'),
+                'message' => 'Пост не найден',
+            ], config('app.error_status'));
         }
 
-        $user = auth()->guard('api')->user();
+        // Проверяем данные запроса
+        $validator = Validator::make($req->all(), [
+            'text' => 'required|string|min:10|max:250',
+            'post_id' => 'required|integer',
+            'comment_id' => '',
+        ]);
+        // Прокидываем ошибки, если данные не прошли валидацию
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => config('app.error_status'),
+                'message' => $validator->errors()
+            ], config('app.error_status'));
+        }
+
+        // Получаем текущего пользователя
+        $user = auth()->user();
+
+        // Создаем комментарий и подгдаем информацию об авторе комментария
         $comment = Comment::create([
             'text' => $req->text,
             'post_id' => $req->post_id,
             'user_id' => $user->id,
             'comment_id' => $req->reply_id,
-        ]);
-        $comment->load('user');
-        return $comment;
+        ])->load('user');
+        // Возвращаем комментарий
+        return response()->json([
+            'status' => config('app.success_status'),
+            'data' => $comment,
+        ], config('app.success_status'));
     }
 
     /**
@@ -58,17 +74,57 @@ class CommentsController extends Controller
      * Обновление комментария по id
      */
     public function update(Request $req, $id) {
-        $comment = Comment::findOrFail($id);
+        // Получаем комментарий по id
+        $comment = Comment::find($id);
+        // Проверяем есть ли комментарий
+        if (!$comment) {
+            return response()->json([
+                'status' => config('app.error_status'),
+                'message' => 'Комментарий не найден',
+            ], config('app.error_status'));
+        }
+
+        // Проверяем данные запроса
+        $validator = Validator::make($req->all(), [
+            'text' => 'string|min:10|max:250',
+        ]);
+        // Прокидываем ошибки, если данные не прошли валидацию
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => config('app.error_status'),
+                'message' => $validator->errors()
+            ], config('app.error_status'));
+        }
+
+        // Обновляем комментарий
         $comment->update($req->all());
-        return $comment;
+        // Возвращаем обновленный комментарий
+        return response()->json([
+            'status' => config('app.success_status'),
+            'data' => $comment,
+        ], config('app.success_status'));
     }
 
     /**
      * Удаление комментария по id
      */
     public function delete($id) {
-        $comment = Comment::findOrFail($id);
+        // Получаем комментарий по id
+        $comment = Comment::find($id);
+        // Проверяем есть ли комментарий
+        if (!$comment) {
+            return response()->json([
+                'status' => config('app.error_status'),
+                'message' => 'Комментарий не найден',
+            ], config('app.error_status'));
+        }
+
+        // Удаляем комментарий
         $comment->delete();
-        return 'Комментарий успешно удален';
+        // Возвращаем сообщение об успешном удалении комментария
+        return response()->json([
+            'status' => config('app.success_status'),
+            'message' => 'Комментарий успешно удален',
+        ], config('app.success_status'));
     }
 }

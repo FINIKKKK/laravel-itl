@@ -11,37 +11,50 @@ class CompaniesController extends Controller
     /**
      * Создание компании
      */
-    public function create(Request $request) {
-        $validator = Validator::make($request->all(), [
-            'name' => ['required', 'string', 'min:2', 'unique:companies,name'],
-            'url_address' => ['required', 'url', 'unique:companies,url_address'],
-        ], [
-                'string' => 'Поле должно быть строчкой',
-                'required' => 'Поле обязательно для заполнения',
-                'name.min' => 'Название должно быть минимум :min символов',
-                'name.unique' => 'Компания с таким названием уже существует',
-                'url' => 'Некорректный url адресс',
-                'url_address.unique' => 'Такой url адресс уже используется',
-            ]
-        );
+    public function create(Request $req) {
+        // Проверяем данные запроса
+        $validator = Validator::make($req->all(), [
+            'name' => 'required|string|min:2|max:150|unique:companies,name',
+            'url_address' => 'required|url|unique:companies,url_address',
+        ]);
+        // Прокидываем ошибки, если данные не прошли валидацию
         if ($validator->fails()) {
-            return response()->json(['message' => $validator->errors()], 400);
+            return response()->json([
+                'status' => config('app.error_status'),
+                'message' => $validator->errors()
+            ], config('app.error_status'));
         }
 
-        $user = auth()->guard('api')->user();
+
+        // Получаем текущего пользователя
+        $user = auth()->user();
+
+        // Создаем компанию
         $company = Company::create([
-            'name' => $request->name,
-            'url_address' => $request->url_address,
+            'name' => $req->name,
+            'url_address' => $req->url_address,
             'user_id' => $user->id,
         ]);
-        return $company;
+        // Возвращаем компанию
+        return response()->json([
+            'status' => config('app.success_status'),
+            'data' => $company,
+        ], config('app.success_status'));
     }
 
     /**
      * Получение всех компаний пользователя
      */
     public function getAll() {
-        $companies = Company::all();
-        return $companies;
+        // Получаем текущего пользователя
+        $user = auth()->user();
+
+        // Получаем список компаний пользователя
+        $companies = Company::where('user_id', $user->id)->get();
+        // Возвращаем список компаний пользователя
+        return response()->json([
+            'status' => config('app.success_status'),
+            'data' => $companies,
+        ], config('app.success_status'));
     }
 }

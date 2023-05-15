@@ -4,7 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
-class UploadFileController extends Controller {
+class UploadFileController extends Controller
+{
     /**
      * Загрузка файлов
      */
@@ -16,6 +17,9 @@ class UploadFileController extends Controller {
             return 'http://127.0.0.1:8000/uploads/' . $imageName;
         }
 
-        return response()->json(['message' => 'Изображение не было загружено'], 400);
+        return response()->json([
+            'status' => config('app.success_status'),
+            'data' => 'Изображение не было загружено',
+        ], config('app.success_status'));
     }
 }

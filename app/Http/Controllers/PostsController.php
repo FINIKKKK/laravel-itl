@@ -13,16 +13,6 @@ class PostsController extends Controller
      * Создание поста
      */
     public function create(Request $req) {
-        // Получаем текущего пользователя
-        $user = auth()->user();
-        // Проверяем аутенфикацию пользователя
-        if (!$user) {
-            return response()->json([
-                'status' => config('app.auth_error_status'),
-                'message' => config('app.auth_error_message')
-            ], config('app.auth_error_status'));
-        }
-
         // Проверяем данные запроса
         $validator = Validator::make($req->all(), [
             'title' => 'required|string|min:35|max:200',
@@ -35,6 +25,9 @@ class PostsController extends Controller
                 'message' => $validator->errors()
             ], config('app.error_status'));
         }
+
+        // Получаем текущего пользователя
+        $user = auth()->user();
 
         // Создаем пост
         $post = Post::create([
@@ -96,16 +89,6 @@ class PostsController extends Controller
      * Обновление поста по id
      */
     public function update(Request $req, $id) {
-        // Получаем текущего пользователя
-        $user = auth()->user();
-        // Проверяем аутенфикацию пользователя
-        if (!$user) {
-            return response()->json([
-                'status' => config('app.auth_error_status'),
-                'message' => config('app.auth_error_message')
-            ], config('app.auth_error_status'));
-        }
-
         // Получаем пост по id
         $post = Post::find($id);
         // Проверяем есть ли пост
