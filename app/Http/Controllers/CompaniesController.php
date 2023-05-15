@@ -8,6 +8,9 @@ use Illuminate\Support\Facades\Validator;
 
 class CompaniesController extends Controller
 {
+    /**
+     * Создание компании
+     */
     public function create(Request $request) {
         $validator = Validator::make($request->all(), [
             'name' => ['required', 'string', 'min:2', 'unique:companies,name'],
@@ -34,6 +37,9 @@ class CompaniesController extends Controller
         return $company;
     }
 
+    /**
+     * Получение всех компаний пользователя
+     */
     public function getAll() {
         $companies = Company::all();
         return $companies;

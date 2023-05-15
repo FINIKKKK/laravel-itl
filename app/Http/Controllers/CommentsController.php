@@ -10,7 +10,9 @@ use Illuminate\Support\Facades\Validator;
 
 class CommentsController extends Controller
 {
-
+    /**
+     * Создание комментария
+     */
     public function create(Request $req) {
         $validator = Validator::make($req->all(), [
             'text' => ['required', 'string', 'max:250'],
@@ -37,7 +39,9 @@ class CommentsController extends Controller
         return $comment;
     }
 
-
+    /**
+     * Получение всех комментариев определенного поста
+     */
     public function getAll(Request $req) {
         $comments = Comment::whereNull('comment_id')->where('post_id', $req->post_id)->with('user')
             ->orderBy('created_at', 'desc')->get();
@@ -50,13 +54,18 @@ class CommentsController extends Controller
         return $comments;
     }
 
-
+    /**
+     * Обновление комментария по id
+     */
     public function update(Request $req, $id) {
         $comment = Comment::findOrFail($id);
         $comment->update($req->all());
         return $comment;
     }
 
+    /**
+     * Удаление комментария по id
+     */
     public function delete($id) {
         $comment = Comment::findOrFail($id);
         $comment->delete();

@@ -95,12 +95,12 @@ Route::controller(PostsController::class)
         /**
          * Получение всех постов
          */
-        Route::name('getAll')->post('/', 'getAll');
+        Route::name('getAll')->get('/', 'getAll');
 
         /**
          * Получение поста по id
          */
-        Route::name('getOne')->post('/{id}', 'getOne');
+        Route::name('getOne')->get('/{id}', 'getOne');
 
         // Группа маршрутов, требующих аутентификации
         Route::middleware('auth')->group(function () {
@@ -134,7 +134,7 @@ Route::controller(CommentsController::class)
         /**
          * Получение всех комментариев
          */
-        Route::name('getAll')->post('/', 'getAll');
+        Route::name('getAll')->get('/', 'getAll');
 
         // Группа маршрутов, требующих аутентификации
         Route::middleware('auth')->group(function () {

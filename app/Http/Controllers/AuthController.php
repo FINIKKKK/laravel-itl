@@ -23,18 +23,10 @@ class AuthController extends BaseController
 
     public function register(Request $request) {
         $validator = Validator::make($request->all(), [
-            'firstName' => ['required', 'string'],
-            'lastName' => ['required', 'string'],
-            'email' => ['required', 'email', 'unique:users,email', 'max:250'],
-            'password' => ['required', 'string', 'min:6', 'confirmed'],
-        ], [
-                'string' => 'Поле должно быть строчкой',
-                'required' => 'Поле обязательно для заполнения',
-                'email' => 'Некорректный email',
-                'email.unique' => 'Пользователь с такой почтой уже зарегистрован',
-                'confirmed' => 'Пароли не совпадают',
-                'password.min' => 'Пароль должен содержать не менее :min символов',
-                'email.max' => 'Email должнен содержать не более :max символов',
+                'firstName' => ['required', 'string'],
+                'lastName' => ['required', 'string'],
+                'email' => ['required', 'email', 'unique:users,email', 'max:250'],
+                'password' => ['required', 'string', 'min:6', 'confirmed'],
             ]
         );
         if ($validator->fails()) {

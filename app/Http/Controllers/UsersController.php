@@ -7,6 +7,9 @@ use Illuminate\Http\Request;
 
 class UsersController extends Controller
 {
+    /**
+     * Получение всех пользователей
+     */
     public function getAll() {
         $users = User::all();
         return $users;
