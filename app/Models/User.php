@@ -12,8 +12,10 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 
-class User extends Authenticatable implements JWTSubject {
+class User extends Authenticatable implements JWTSubject
+{
     use HasApiTokens, HasFactory, Notifiable;
+
     protected $guarded = false;
 
     protected $hidden = [
@@ -38,13 +40,15 @@ class User extends Authenticatable implements JWTSubject {
         return [];
     }
 
-    public function company() {
-        return $this->hasOne(Company::class);
+    public function companies() {
+        return $this->hasMany(Company::class);
     }
-    public function post() {
-        return $this->belongsTo(Post::class);
+
+    public function posts() {
+        return $this->hasMany(Post::class);
     }
-    public function comment() {
-        return $this->belongsTo(Comment::class);
+
+    public function comments() {
+        return $this->hasMany(Comment::class);
     }
 }

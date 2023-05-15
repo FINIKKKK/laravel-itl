@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Comment;
 use App\Models\Post;
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -16,9 +15,9 @@ class CommentsController extends Controller
     public function create(Request $req) {
         // Проверяем данные запроса
         $validator = Validator::make($req->all(), [
-            'text' => 'required|string|min:10|max:250',
+            'text' => 'required|string|min:5|max:250',
             'post_id' => 'required|integer',
-            'comment_id' => '',
+            'parent_id' => 'integer',
         ]);
         // Прокидываем ошибки, если данные не прошли валидацию
         if ($validator->fails()) {
@@ -46,7 +45,7 @@ class CommentsController extends Controller
             'text' => $req->text,
             'post_id' => $req->post_id,
             'user_id' => $user->id,
-            'comment_id' => $req->reply_id,
+            'parent_comment_id' => $req->parent_id,
         ])->load('user');
         // Возвращаем комментарий
         return response()->json([
@@ -75,7 +74,7 @@ class CommentsController extends Controller
         // + Определенного поста
         // + Привязываем информацио об авторе
         // + Сортируем по дате (сначала новые)
-        $comments = Comment::whereNull('comment_id')
+        $comments = Comment::whereNull('parent_comment_id')
             ->where('post_id', $req->post_id)
             ->with('user')
             ->orderBy('created_at', 'desc')
@@ -83,7 +82,7 @@ class CommentsController extends Controller
 
         // Пробегаймся по комментриям, и добавляем к какждому дочерние комментарии
         foreach ($comments as $comment) {
-            $children = Comment::where('comment_id', $comment->id)->with('user')->get();
+            $children = Comment::where('parent_comment_id', $comment->id)->with('user')->get();
             $comment->children = $children;
         }
 
@@ -110,7 +109,7 @@ class CommentsController extends Controller
 
         // Проверяем данные запроса
         $validator = Validator::make($req->all(), [
-            'text' => 'string|min:10|max:250',
+            'text' => 'string|min:5|max:250',
         ]);
         // Прокидываем ошибки, если данные не прошли валидацию
         if ($validator->fails()) {

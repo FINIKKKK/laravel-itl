@@ -15,7 +15,7 @@ class PostsController extends Controller
     public function create(Request $req) {
         // Проверяем данные запроса
         $validator = Validator::make($req->all(), [
-            'title' => 'required|string|min:35|max:200',
+            'title' => 'required|string|min:15|max:200',
             'body' => 'required',
         ]);
         // Прокидываем ошибки, если данные не прошли валидацию
@@ -101,7 +101,7 @@ class PostsController extends Controller
 
         // Проверяем данные запроса
         $validator = Validator::make($req->all(), [
-            'title' => 'string|min:35|max:200',
+            'title' => 'string|min:15|max:200',
             'body' => '',
         ]);
         // Прокидываем ошибки, если данные не прошли валидацию

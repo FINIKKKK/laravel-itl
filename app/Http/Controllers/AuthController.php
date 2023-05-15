@@ -109,13 +109,23 @@ class AuthController extends BaseController
         ], config('app.success_status'));
     }
 
+    /**
+     * Получение информации о текущем пользователе
+     */
     public function me() {
+        // Получение текущего пользователя
         $user = auth()->user();
-        $company = Company::where('user_id', $user->id)->first();
 
+        // Получение компаний текущего пользователя
+        $companies = Company::where('user_id', $user->id)->get();
+
+        // Возвращение информации о текущем пользователе и его компаний
         return response()->json([
-            'user' => $user,
-            'company' => $company,
-        ]);
+            'status' => config('app.success_status'),
+            'data' => [
+                'user' => $user,
+                'companies' => $companies,
+            ],
+        ], config('app.success_status'));
     }
 }
