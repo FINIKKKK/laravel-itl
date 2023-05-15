@@ -5,6 +5,13 @@ use Illuminate\Support\ServiceProvider;
 
 return [
 
+
+    'auth_error_status' => env('AUTH_ERROR_STATUS', 401),
+    'auth_error_message' => env('AUTH_ERROR_MESSAGE', 'Пользователь не аутентифицирован'),
+    'error_status' => env('ERROR_STATUS', 400),
+    'success_status' => env('SUCCESS_STATUS', 200),
+
+
     /*
     |--------------------------------------------------------------------------
     | Application Name
@@ -42,7 +49,7 @@ return [
     |
     */
 
-    'debug' => (bool) env('APP_DEBUG', false),
+    'debug' => (bool)env('APP_DEBUG', false),
 
     /*
     |--------------------------------------------------------------------------

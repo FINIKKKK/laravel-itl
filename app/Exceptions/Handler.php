@@ -2,7 +2,10 @@
 
 namespace App\Exceptions;
 
+use Exception;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -18,11 +21,22 @@ class Handler extends ExceptionHandler
         'password_confirmation',
     ];
 
+
+    public function render($request, Throwable $e) {
+        if ($e instanceof AuthenticationException) {
+            return new JsonResponse([
+                'status' => config('app.auth_error_status'),
+                'message' => config('app.auth_error_message')
+            ], config('app.auth_error_status'));
+        }
+
+        return parent::render($request, $e);
+    }
+
     /**
      * Register the exception handling callbacks for the application.
      */
-    public function register(): void
-    {
+    public function register(): void {
         $this->reportable(function (Throwable $e) {
             //
         });
