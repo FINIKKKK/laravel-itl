@@ -10,6 +10,7 @@ return [
     'auth_error_message' => env('AUTH_ERROR_MESSAGE', 'Пользователь не аутентифицирован'),
     'error_status' => env('ERROR_STATUS', 400),
     'success_status' => env('SUCCESS_STATUS', 200),
+    'img_path' => env('IMG_PATH', 'uploads/img'),
 
 
     /*

@@ -6,63 +6,107 @@ use App\Models\Company;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
 class AuthController extends BaseController
 {
 
-    protected function respondWithToken($token) {
+    // Возворащение пользователя и его токена
+    protected function respondUserWithToken($user, $token) {
         return response()->json([
-            'access_token' => $token,
-            'token_type' => 'bearer',
-            'expires_in' => auth()->factory()->getTTL() * 60,
-        ]);
+            'status' => config('app.success_status'),
+            'data' => [
+                'user' => $user,
+                'token' => [
+                    'access_token' => $token,
+                    'token_type' => 'bearer',
+                    'expires_in' => auth()->factory()->getTTL() * 60,
+                ],
+            ]]);
     }
 
-    public function register(Request $request) {
-        $validator = Validator::make($request->all(), [
-                'firstName' => ['required', 'string'],
-                'lastName' => ['required', 'string'],
-                'email' => ['required', 'email', 'unique:users,email', 'max:250'],
-                'password' => ['required', 'string', 'min:6', 'confirmed'],
-            ]
-        );
+    /**
+     * Регистрация пользователя
+     */
+    public function register(Request $req) {
+        // Проверяем данные запроса
+        $validator = Validator::make($req->all(), [
+            'firstName' => 'required|string',
+            'lastName' => 'required|string',
+            'email' => 'required|string|max:250|unique:users,email',
+            'password' => 'required|string|min:6|confirmed',
+        ]);
+        // Прокидываем ошибки, если данные не прошли валидацию
         if ($validator->fails()) {
-            return response()->json(['message' => $validator->errors()], 400);
+            return response()->json([
+                'status' => config('app.error_status'),
+                'message' => $validator->errors()
+            ], config('app.error_status'));
         }
 
+        // Создаем пользователя
         $user = User::create([
-            'firstName' => $request->firstName,
-            'lastName' => $request->lastName,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
+            'firstName' => $req->firstName,
+            'lastName' => $req->lastName,
+            'email' => $req->email,
+            // Зашифровываем пароль
+            'password' => Hash::make($req->password),
         ]);
-        $token = Auth::guard('api')->login($user);
-        return $this->respondWithToken($token);
+        // Получаем токен
+        $token = auth()->login($user);
+
+        // Возвращаем данные пользователя и его токен
+        return $this->respondUserWithToken($user, $token);
     }
 
-    public function login(Request $request) {
-        $validator = Validator::make($request->all(), [
-            'email' => ['required', 'string', 'email'],
-            'password' => ['required', 'string'],
+    /**
+     * Вход в аккаунт
+     */
+    public function login(Request $req) {
+        // Проверяем данные запроса
+        $validator = Validator::make($req->all(), [
+            'email' => 'required|string|email',
+            'password' => 'required|string',
         ]);
+        // Прокидываем ошибки, если данные не прошли валидацию
         if ($validator->fails()) {
-            return response()->json(['message' => $validator->errors()], 400);
+            return response()->json([
+                'status' => config('app.error_status'),
+                'message' => $validator->errors()
+            ], config('app.error_status'));
         }
 
-        $loginValue = $request->only('email', 'password');
-        $token = Auth::attempt($loginValue);
+        // Выбираем только поля email и password из запроса
+        $loginValue = $req->only('email', 'password');
+        // Проверяем авторизацию пользователя
+        $token = auth()->attempt($loginValue);
+        // Если не прошел, то прокидываем ошибку
         if (!$token) {
-            return response()->json(['main_message' => 'Неверный email или пароль'], 400);
+            return response()->json([
+                'status' => config('app.error_status'),
+                'message' => 'Неверный email или пароль',
+            ], config('app.error_status'));
         }
-        return $this->respondWithToken($token);
+
+        // Получаем данные пользователя
+        $user = auth()->user();
+        // Возвращаем данные пользователя и его токен
+        return $this->respondUserWithToken($user, $token);
     }
 
+    /**
+     * Выход из аккаунта
+     */
     public function logout() {
+        // Выход из аккаунта
         auth()->logout();
-        return response()->json(['message' => 'Successfully logged out']);
+
+        // Возвращаем сообщение об успешном выходе
+        return response()->json([
+            'status' => config('app.success_status'),
+            'message' => 'Успешный выход из аккаунта',
+        ], config('app.success_status'));
     }
 
     public function me() {

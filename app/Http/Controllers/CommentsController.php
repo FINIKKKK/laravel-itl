@@ -14,16 +14,6 @@ class CommentsController extends Controller
      * Создание комментария
      */
     public function create(Request $req) {
-        // Получаем пост по id
-        $post = Post::find($id);
-        // Проверяем есть ли пост
-        if (!$post) {
-            return response()->json([
-                'status' => config('app.error_status'),
-                'message' => 'Пост не найден',
-            ], config('app.error_status'));
-        }
-
         // Проверяем данные запроса
         $validator = Validator::make($req->all(), [
             'text' => 'required|string|min:10|max:250',
@@ -35,6 +25,16 @@ class CommentsController extends Controller
             return response()->json([
                 'status' => config('app.error_status'),
                 'message' => $validator->errors()
+            ], config('app.error_status'));
+        }
+
+        // Получаем пост по id
+        $post = Post::find($req->post_id);
+        // Проверяем есть ли пост
+        if (!$post) {
+            return response()->json([
+                'status' => config('app.error_status'),
+                'message' => 'Пост не найден',
             ], config('app.error_status'));
         }
 
@@ -59,15 +59,39 @@ class CommentsController extends Controller
      * Получение всех комментариев определенного поста
      */
     public function getAll(Request $req) {
-        $comments = Comment::whereNull('comment_id')->where('post_id', $req->post_id)->with('user')
-            ->orderBy('created_at', 'desc')->get();
+        // Проверяем данные запроса
+        $validator = Validator::make($req->all(), [
+            'post_id' => 'required|integer',
+        ]);
+        // Прокидываем ошибки, если данные не прошли валидацию
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => config('app.error_status'),
+                'message' => $validator->errors()
+            ], config('app.error_status'));
+        }
 
+        // Получаем только те комментарии, которые являются родителями
+        // + Определенного поста
+        // + Привязываем информацио об авторе
+        // + Сортируем по дате (сначала новые)
+        $comments = Comment::whereNull('comment_id')
+            ->where('post_id', $req->post_id)
+            ->with('user')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        // Пробегаймся по комментриям, и добавляем к какждому дочерние комментарии
         foreach ($comments as $comment) {
             $children = Comment::where('comment_id', $comment->id)->with('user')->get();
             $comment->children = $children;
         }
 
-        return $comments;
+        // Возвращаем комментарии
+        return response()->json([
+            'status' => config('app.success_status'),
+            'data' => $comments,
+        ], config('app.success_status'));
     }
 
     /**

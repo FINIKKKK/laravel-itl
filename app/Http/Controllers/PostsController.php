@@ -47,11 +47,11 @@ class PostsController extends Controller
      */
     public function getAll() {
         // Получаем список постов
-        // Также добавляем информацию об авторе поста
-        // Без поля body
-        // Отсортированный по дате (сначала новые)
+        // + Добавляем информацию об авторе поста
+        // + Без поля body
+        // + Сортируем по дате (сначала новые)
         $posts = Post::with('user')
-            ->select('id', 'title', 'created_at', 'updated_at', 'user_id')
+            ->without('body')
             ->orderBy('created_at', 'desc')
             ->get();
 
