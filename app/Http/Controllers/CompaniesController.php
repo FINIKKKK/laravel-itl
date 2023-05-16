@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Company;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 
 class CompaniesController extends Controller
 {
@@ -29,12 +30,17 @@ class CompaniesController extends Controller
         // Получаем текущего пользователя
         $user = auth()->user();
 
+        // Создаем slug
+        $slug = Str::slug($req->name);
+
         // Создаем компанию
         $company = Company::create([
             'name' => $req->name,
+            'slug' => $slug,
             'url_address' => $req->url_address,
             'user_id' => $user->id,
         ]);
+
         // Возвращаем компанию
         return response()->json([
             'status' => config('app.success_status'),

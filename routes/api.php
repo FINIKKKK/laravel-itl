@@ -3,6 +3,7 @@
 use App\Http\Controllers\CommentsController;
 use App\Http\Controllers\CompaniesController;
 use App\Http\Controllers\PostsController;
+use App\Http\Controllers\SectionsController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UsersController;
 use App\Http\Controllers\UploadFileController;
@@ -158,3 +159,43 @@ Route::controller(CommentsController::class)
 
 // Загрузка файлов
 Route::post('/upload', [UploadFileController::class, 'upload']);
+
+
+/*
+|---------------------------------------------------------------
+| Разделы
+|---------------------------------------------------------------
+*/
+Route::controller(SectionsController::class)
+    ->prefix('sections')
+    ->name('sections.')
+    ->group(callback: function () {
+        /**
+         * Получение всех разделов
+         */
+        Route::name('getAll')->get('/', 'getAll');
+
+        /**
+         * Получение раздела по id
+         */
+        Route::name('getOne')->get('/{id}', 'getOne');
+
+        // Группа маршрутов, требующих аутентификации
+        Route::middleware('auth')->group(function () {
+            /**
+             * Создание нового раздела
+             */
+            Route::name('create')->post('/', 'create');
+
+            /**
+             * Обновление раздела по id
+             */
+            Route::name('update')->patch('/{id}', 'update');
+
+            /**
+             * Удаление раздела по id
+             */
+            Route::name('delete')->delete('/{id}', 'delete');
+        });
+    });
+
