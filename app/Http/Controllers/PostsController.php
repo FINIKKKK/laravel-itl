@@ -15,8 +15,9 @@ class PostsController extends Controller
     public function create(Request $req) {
         // Проверяем данные запроса
         $validator = Validator::make($req->all(), [
-            'title' => 'required|string|min:15|max:200',
+            'title' => 'required|string|min:5|max:200',
             'body' => 'required',
+            'section_id' => 'required|integer',
         ]);
         // Прокидываем ошибки, если данные не прошли валидацию
         if ($validator->fails()) {
@@ -34,6 +35,7 @@ class PostsController extends Controller
             'title' => $req->title,
             'body' => json_encode($req->body),
             'user_id' => $user->id,
+            'section_id' => $req->section_id,
         ]);
         // Возвращаем пост
         return response()->json([
@@ -45,12 +47,24 @@ class PostsController extends Controller
     /**
      * Получение всех постов
      */
-    public function getAll() {
+    public function getAll(Request $req) {
+        // Проверяем данные запроса
+        $validator = Validator::make($req->all(), [
+            'section_id' => 'required|integer',
+        ]);
+        // Прокидываем ошибки, если данные не прошли валидацию
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => config('app.error_status'),
+                'message' => $validator->errors()
+            ], config('app.error_status'));
+        }
+
         // Получаем список постов
         // + Добавляем информацию об авторе поста
         // + Без поля body
         // + Сортируем по дате (сначала новые)
-        $posts = Post::with('user')
+        $posts = Post::where('section_id', $req->section_id)->with('user')
             ->without('body')
             ->orderBy('created_at', 'desc')
             ->get();

@@ -13,7 +13,8 @@ return new class extends Migration {
             $table->id();
             $table->string('title');
             $table->json('body');
-            $table->foreignId('parent_id')->constrained('sections')->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('parent_id')->nullable()->constrained('sections')->cascadeOnDelete();
             $table->foreignId('company_id')->constrained()->cascadeOnDelete();
             $table->timestamps();
         });

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Company;
+use App\Models\Post;
 use App\Models\Section;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -13,10 +14,22 @@ class SectionsController extends Controller
      * Создание раздела
      */
     public function create(Request $req) {
+        // Получаем компанию по id
+        $company = Company::find($req->company_id);
+        // Проверяем есть ли компанию
+        if (!$company) {
+            return response()->json([
+                'status' => config('app.error_status'),
+                'message' => 'Компания не найдена',
+            ], config('app.error_status'));
+        }
+
         // Проверяем данные запроса
         $validator = Validator::make($req->all(), [
-            'title' => 'required|string|min:15|max:200',
-            'body' => 'required',
+            'title' => 'required|string|min:5|max:200',
+            'body' => '',
+            'company_id' => 'required|integer',
+            'parent_id' => 'integer',
         ]);
         // Прокидываем ошибки, если данные не прошли валидацию
         if ($validator->fails()) {
@@ -26,10 +39,16 @@ class SectionsController extends Controller
             ], config('app.error_status'));
         }
 
+        // Получаем текущего пользователя
+        $user = auth()->user();
+
         // Создаем раздел
         $section = Section::create([
             'title' => $req->title,
             'body' => json_encode($req->body),
+            'user_id' => $user->id,
+            'company_id' => $req->company_id,
+            'parent_id' => $req->parent_id,
         ]);
         // Возвращаем раздел
         return response()->json([
@@ -54,10 +73,12 @@ class SectionsController extends Controller
             ], config('app.error_status'));
         }
 
-        // Получаем список разделов определенной компании
+        // Получаем список разделов только родительские
+        // + Определенной компании
         // + Без поля body
         // + Сортируем по дате (сначала новые)
-        $sections = Section::where('company_id', $req->company_id)
+        $sections = Section::whereNull('parent_id')
+            ->where('company_id', $req->company_id)
             ->without('body')
             ->orderBy('created_at', 'desc')
             ->get();
@@ -73,8 +94,8 @@ class SectionsController extends Controller
      * Получение одного раздела по id
      */
     public function getOne($id) {
-        // Получаем раздел по id
-        $section = Section::find($id);
+        // Получаем раздел по id и привязываем информацию о пользователе
+        $section = Section::with('user')->find($id);
         // Проверяем есть ли такой раздел
         if (!$section) {
             return response()->json([
@@ -85,6 +106,16 @@ class SectionsController extends Controller
 
         // Конвертируем body у раздела из строки в массив
         $section->body = json_decode($section->body);
+
+        // Получаем дочерние разделы
+        $childSections = Section::where('parent_id', $id)->get();
+        $posts = Post::where('section_id', $id)->get();
+
+        $section->data = [
+            'sections' => $childSections,
+            'posts' => $posts,
+        ];
+
         // Возвращаем раздел
         return response()->json([
             'status' => config('app.success_status'),
@@ -143,7 +174,7 @@ class SectionsController extends Controller
         }
 
         // Удаляем все посты, связанные с разделом
-//        Post::where('section_id', $id)->delete();
+        //        Post::where('section_id', $id)->delete();
         // Удаляем раздел
         $section->delete();
 
