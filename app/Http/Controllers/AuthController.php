@@ -85,7 +85,7 @@ class AuthController extends BaseController {
         if (!$token) {
             return response()->json([
                 'status' => config('app.error_status'),
-                'message' => 'Неверный email или пароль',
+                'message' => ['Неверный email или пароль'],
             ], config('app.error_status'));
         }
 
@@ -120,7 +120,7 @@ class AuthController extends BaseController {
         // Возвращаем сообщение об успешном выходе
         return response()->json([
             'status' => config('app.success_status'),
-            'message' => 'Успешный выход из аккаунта',
+            'message' => ['Успешный выход из аккаунта'],
         ], config('app.success_status'));
     }
 

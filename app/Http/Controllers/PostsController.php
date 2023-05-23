@@ -33,7 +33,7 @@ class PostsController extends Controller {
         if (!$section) {
             return response()->json([
                 'status' => config('app.error_status'),
-                'message' => 'Раздел не найден',
+                'message' => ['Раздел не найден'],
             ], config('app.error_status'));
         }
 
@@ -96,7 +96,7 @@ class PostsController extends Controller {
         if (!$post) {
             return response()->json([
                 'status' => config('app.error_status'),
-                'message' => 'Пост не найден',
+                'message' => ['Пост не найден'],
             ], config('app.error_status'));
         }
 
@@ -119,7 +119,7 @@ class PostsController extends Controller {
         if (!$post) {
             return response()->json([
                 'status' => config('app.error_status'),
-                'message' => 'Пост не найден',
+                'message' => ['Пост не найден'],
             ], config('app.error_status'));
         }
 
@@ -155,7 +155,7 @@ class PostsController extends Controller {
         if (!$post) {
             return response()->json([
                 'status' => config('app.error_status'),
-                'message' => 'Пост не найден',
+                'message' => ['Пост не найден'],
             ], config('app.error_status'));
         }
 
@@ -167,7 +167,7 @@ class PostsController extends Controller {
         // Возвращаем сообщение об успешном удалении
         return response()->json([
             'status' => config('app.success_status'),
-            'message' => 'Пост успешно удален',
+            'message' => ['Пост успешно удален'],
         ], config('app.success_status'));
     }
 }

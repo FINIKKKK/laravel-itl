@@ -58,20 +58,18 @@ Route::controller(UsersController::class)
          */
         Route::name('getAll')->get('/', 'getAll');
 
-        /**
-         * Обновление данных пользователя
-         */
-        Route::name('updateUserData')->post('/{id}', 'updateUserData');
+        // Группа маршрутов, требующих аутентификации
+        Route::middleware('auth')->group(function () {
+            /**
+             * Обновление данных пользователя
+             */
+            Route::name('updateUserData')->post('/', 'updateUserData');
 
-        /**
-         * Обновление пароля пользователя
-         */
-        Route::name('updatePassword')->patch('/password/{id}', 'updatePassword');
-
-        /**
-         * Обновление пароля пользователя
-         */
-        Route::name('updateAvatar')->post('/avatar/{id}', 'updateAvatar');
+            /**
+             * Обновление пароля пользователя
+             */
+            Route::name('updatePassword')->patch('/password', 'updatePassword');
+        });
     });
 
 

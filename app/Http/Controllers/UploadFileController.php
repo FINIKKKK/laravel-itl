@@ -13,6 +13,7 @@ class UploadFileController extends Controller {
         // Проверяем данные запроса
         $validator = Validator::make($req->all(), [
             'image' => 'required|image|mimes:png,jpg,jpeg|max:2048',
+            'path' => 'string'
         ]);
         // Прокидываем ошибки, если данные не прошли валидацию
         if ($validator->fails()) {
@@ -26,22 +27,27 @@ class UploadFileController extends Controller {
         $image = $req->image;
         if ($image->isValid()) {
             // Путь для загрузки изображений
-            $imgPath = config('img_path');
+            $path = config('database.connections.pgsql.host');
+            // Путь для загрузки изображений
+            $imgPath = config('app.img_path');
+
+            // Менять пути, взависимости от типа изображения
+            if ($req->path) {
+                $imgPath = $req->path;
+            }
+
             // Генерируем название изображения
             $imageName = time() . '.' . $image->getClientOriginalExtension();
             // Загружаем изображение в папку
             $image->move(public_path($imgPath), $imageName);
 
             // Возвращаем полный путь изображения
-            return response()->json([
-                'status' => config('app.success_status'),
-                'data' => "http://127.0.0.1:8000/{$imgPath}/" . $imageName,
-            ], config('app.success_status'));
+            return "http://{$path}:8000/{$imgPath}/{$imageName}";
         } else {
             // Прокидываем ошибку, если изображение не было загружено
             return response()->json([
                 'status' => config('app.error_status'),
-                'message' => 'Ошибка загрузки изображения',
+                'message' => ['Ошибка загрузки изображения'],
             ], config('app.error_status'));
         }
     }

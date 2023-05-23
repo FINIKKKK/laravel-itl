@@ -73,7 +73,7 @@ class CompaniesController extends Controller {
         if (!$company) {
             return response()->json([
                 'status' => config('app.error_status'),
-                'message' => 'Компания не найдена',
+                'message' => ['Компания не найдена'],
             ], config('app.error_status'));
         }
         // Возвращаем список компаний пользователя

@@ -27,6 +27,8 @@ return [
     */
     // Путь для изображений
     'img_path' => env('IMG_PATH', 'uploads/img'),
+    // Путь для аватарок пользователей
+    'img_path_avatar' => env('IMG_PATH_AVATAR', 'uploads/img/avatars'),
 
 
     /*

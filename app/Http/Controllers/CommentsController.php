@@ -32,7 +32,7 @@ class CommentsController extends Controller {
         if (!$post) {
             return response()->json([
                 'status' => config('app.error_status'),
-                'message' => 'Пост не найден',
+                'message' => ['Пост не найден'],
             ], config('app.error_status'));
         }
 
@@ -102,7 +102,7 @@ class CommentsController extends Controller {
         if (!$comment) {
             return response()->json([
                 'status' => config('app.error_status'),
-                'message' => 'Комментарий не найден',
+                'message' => ['Комментарий не найден'],
             ], config('app.error_status'));
         }
 
@@ -137,7 +137,7 @@ class CommentsController extends Controller {
         if (!$comment) {
             return response()->json([
                 'status' => config('app.error_status'),
-                'message' => 'Комментарий не найден',
+                'message' => ['Комментарий не найден'],
             ], config('app.error_status'));
         }
 
@@ -146,7 +146,7 @@ class CommentsController extends Controller {
         // Возвращаем сообщение об успешном удалении комментария
         return response()->json([
             'status' => config('app.success_status'),
-            'message' => 'Комментарий успешно удален',
+            'message' => ['Комментарий успешно удален'],
         ], config('app.success_status'));
     }
 }

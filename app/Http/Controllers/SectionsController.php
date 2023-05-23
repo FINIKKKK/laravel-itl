@@ -19,7 +19,7 @@ class SectionsController extends Controller {
         if (!$company) {
             return response()->json([
                 'status' => config('app.error_status'),
-                'message' => 'Компания не найдена',
+                'message' => ['Компания не найдена'],
             ], config('app.error_status'));
         }
 
@@ -99,7 +99,7 @@ class SectionsController extends Controller {
         if (!$section->count()) {
             return response()->json([
                 'status' => config('app.error_status'),
-                'message' => 'Раздел не найден',
+                'message' => ['Раздел не найден'],
             ], config('app.error_status'));
         }
 
@@ -132,7 +132,7 @@ class SectionsController extends Controller {
         if (!$section) {
             return response()->json([
                 'status' => config('app.error_status'),
-                'message' => 'Раздел не найден',
+                'message' => ['Раздел не найден'],
             ], config('app.error_status'));
         }
 
@@ -168,7 +168,7 @@ class SectionsController extends Controller {
         if (!$section) {
             return response()->json([
                 'status' => config('app.error_status'),
-                'message' => 'Раздел не найден',
+                'message' => ['Раздел не найден'],
             ], config('app.error_status'));
         }
 
@@ -180,7 +180,7 @@ class SectionsController extends Controller {
         // Возвращаем сообщение об успешном удалении
         return response()->json([
             'status' => config('app.success_status'),
-            'message' => 'Раздел успешно удален',
+            'message' => ['Раздел успешно удален'],
         ], config('app.success_status'));
     }
 }
