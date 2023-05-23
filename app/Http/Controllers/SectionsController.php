@@ -8,8 +8,7 @@ use App\Models\Section;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
-class SectionsController extends Controller
-{
+class SectionsController extends Controller {
     /**
      * Создание раздела
      */
@@ -35,14 +34,14 @@ class SectionsController extends Controller
         if ($validator->fails()) {
             return response()->json([
                 'status' => config('app.error_status'),
-                'message' => $validator->errors()
+                'message' => $validator->errors()->all()
             ], config('app.error_status'));
         }
 
         // Получаем текущего пользователя
         $user = auth()->user();
 
-        // Создаем раздел
+        // Создаем раздел (касты)
         $section = Section::create([
             'title' => $req->title,
             'body' => json_encode($req->body),
@@ -69,7 +68,7 @@ class SectionsController extends Controller
         if ($validator->fails()) {
             return response()->json([
                 'status' => config('app.error_status'),
-                'message' => $validator->errors()
+                'message' => $validator->errors()->all()
             ], config('app.error_status'));
         }
 
@@ -97,7 +96,7 @@ class SectionsController extends Controller
         // Получаем раздел по id и привязываем информацию о пользователе
         $section = Section::with('user')->find($id);
         // Проверяем есть ли такой раздел
-        if (!$section) {
+        if (!$section->count()) {
             return response()->json([
                 'status' => config('app.error_status'),
                 'message' => 'Раздел не найден',
@@ -146,7 +145,7 @@ class SectionsController extends Controller
         if ($validator->fails()) {
             return response()->json([
                 'status' => config('app.error_status'),
-                'message' => $validator->errors()
+                'message' => $validator->errors()->all()
             ], config('app.error_status'));
         }
 

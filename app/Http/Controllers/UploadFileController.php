@@ -5,8 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
-class UploadFileController extends Controller
-{
+class UploadFileController extends Controller {
     /**
      * Загрузка файлов
      */
@@ -19,12 +18,12 @@ class UploadFileController extends Controller
         if ($validator->fails()) {
             return response()->json([
                 'status' => config('app.error_status'),
-                'message' => $validator->errors()
+                'message' => $validator->errors()->all()
             ], config('app.error_status'));
         }
 
         // Загружаем изображение
-        $image = $req->file('image');
+        $image = $req->image;
         if ($image->isValid()) {
             // Путь для загрузки изображений
             $imgPath = config('img_path');

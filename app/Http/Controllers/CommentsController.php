@@ -7,8 +7,7 @@ use App\Models\Post;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
-class CommentsController extends Controller
-{
+class CommentsController extends Controller {
     /**
      * Создание комментария
      */
@@ -23,7 +22,7 @@ class CommentsController extends Controller
         if ($validator->fails()) {
             return response()->json([
                 'status' => config('app.error_status'),
-                'message' => $validator->errors()
+                'message' => $validator->errors()->all()
             ], config('app.error_status'));
         }
 
@@ -66,7 +65,7 @@ class CommentsController extends Controller
         if ($validator->fails()) {
             return response()->json([
                 'status' => config('app.error_status'),
-                'message' => $validator->errors()
+                'message' => $validator->errors()->all()
             ], config('app.error_status'));
         }
 
@@ -115,7 +114,7 @@ class CommentsController extends Controller
         if ($validator->fails()) {
             return response()->json([
                 'status' => config('app.error_status'),
-                'message' => $validator->errors()
+                'message' => $validator->errors()->all()
             ], config('app.error_status'));
         }
 

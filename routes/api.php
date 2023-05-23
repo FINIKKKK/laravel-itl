@@ -1,13 +1,13 @@
 <?php
 
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CommentsController;
 use App\Http\Controllers\CompaniesController;
 use App\Http\Controllers\PostsController;
 use App\Http\Controllers\SectionsController;
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\UsersController;
 use App\Http\Controllers\UploadFileController;
-use App\Http\Controllers\AuthController;
+use App\Http\Controllers\UsersController;
+use Illuminate\Support\Facades\Route;
 
 
 /*
@@ -57,6 +57,21 @@ Route::controller(UsersController::class)
          * Получение всех пользователей
          */
         Route::name('getAll')->get('/', 'getAll');
+
+        /**
+         * Обновление данных пользователя
+         */
+        Route::name('updateUserData')->post('/{id}', 'updateUserData');
+
+        /**
+         * Обновление пароля пользователя
+         */
+        Route::name('updatePassword')->patch('/password/{id}', 'updatePassword');
+
+        /**
+         * Обновление пароля пользователя
+         */
+        Route::name('updateAvatar')->post('/avatar/{id}', 'updateAvatar');
     });
 
 
@@ -80,6 +95,11 @@ Route::controller(CompaniesController::class)
              * Создание новой компании
              */
             Route::name('create')->post('/', 'create');
+
+            /**
+             * Получении компании по slug
+             */
+            Route::name('getOne')->get('/{slug}', 'getOne');
         });
     });
 

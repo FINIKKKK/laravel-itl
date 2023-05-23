@@ -4,11 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Comment;
 use App\Models\Post;
+use App\Models\Section;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
-class PostsController extends Controller
-{
+class PostsController extends Controller {
     /**
      * Создание поста
      */
@@ -23,7 +23,17 @@ class PostsController extends Controller
         if ($validator->fails()) {
             return response()->json([
                 'status' => config('app.error_status'),
-                'message' => $validator->errors()
+                'message' => $validator->errors()->all()
+            ], config('app.error_status'));
+        }
+
+        // Получаем раздел по id
+        $section = Section::find($req->section_id);
+        // Проверяем есть ли раздел
+        if (!$section) {
+            return response()->json([
+                'status' => config('app.error_status'),
+                'message' => 'Раздел не найден',
             ], config('app.error_status'));
         }
 
@@ -56,7 +66,7 @@ class PostsController extends Controller
         if ($validator->fails()) {
             return response()->json([
                 'status' => config('app.error_status'),
-                'message' => $validator->errors()
+                'message' => $validator->errors()->all()
             ], config('app.error_status'));
         }
 
@@ -122,7 +132,7 @@ class PostsController extends Controller
         if ($validator->fails()) {
             return response()->json([
                 'status' => config('app.error_status'),
-                'message' => $validator->errors()
+                'message' => $validator->errors()->all()
             ], config('app.error_status'));
         }
 

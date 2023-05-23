@@ -7,8 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
-class CompaniesController extends Controller
-{
+class CompaniesController extends Controller {
     /**
      * Создание компании
      */
@@ -22,7 +21,7 @@ class CompaniesController extends Controller
         if ($validator->fails()) {
             return response()->json([
                 'status' => config('app.error_status'),
-                'message' => $validator->errors()
+                'message' => $validator->errors()->all()
             ], config('app.error_status'));
         }
 
@@ -61,6 +60,26 @@ class CompaniesController extends Controller
         return response()->json([
             'status' => config('app.success_status'),
             'data' => $companies,
+        ], config('app.success_status'));
+    }
+
+    /**
+     * Получение компании по slug
+     */
+    public function getOne($slug) {
+        // Получаем компанию по slug
+        $company = Company::where('slug', $slug)->get();
+        // Проверяем есть ли компанию
+        if (!$company) {
+            return response()->json([
+                'status' => config('app.error_status'),
+                'message' => 'Компания не найдена',
+            ], config('app.error_status'));
+        }
+        // Возвращаем список компаний пользователя
+        return response()->json([
+            'status' => config('app.success_status'),
+            'data' => $company,
         ], config('app.success_status'));
     }
 }

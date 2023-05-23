@@ -9,8 +9,7 @@ use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
-class AuthController extends BaseController
-{
+class AuthController extends BaseController {
 
     // Возворащение пользователя и его токена
     protected function respondUserWithToken($user, $token) {
@@ -23,7 +22,8 @@ class AuthController extends BaseController
                     'token_type' => 'bearer',
                     'expires_in' => auth()->factory()->getTTL() * 60,
                 ],
-            ]]);
+            ]
+        ]);
     }
 
     /**
@@ -41,7 +41,7 @@ class AuthController extends BaseController
         if ($validator->fails()) {
             return response()->json([
                 'status' => config('app.error_status'),
-                'message' => $validator->errors()
+                'message' => $validator->errors()->all()
             ], config('app.error_status'));
         }
 
@@ -73,14 +73,14 @@ class AuthController extends BaseController
         if ($validator->fails()) {
             return response()->json([
                 'status' => config('app.error_status'),
-                'message' => $validator->errors()
+                'message' => $validator->errors()->all()
             ], config('app.error_status'));
         }
 
         // Выбираем только поля email и password из запроса
         $loginValue = $req->only('email', 'password');
         // Проверяем авторизацию пользователя
-        $token = auth()->attempt($loginValue);
+        $token = auth()->setTTL(config('app.token_lifetime'))->attempt($loginValue);
         // Если не прошел, то прокидываем ошибку
         if (!$token) {
             return response()->json([
@@ -91,8 +91,23 @@ class AuthController extends BaseController
 
         // Получаем данные пользователя
         $user = auth()->user();
+
+        // Получаем компании пользователя
+        $companies = Company::where('user_id', $user->id)->get();
+
         // Возвращаем данные пользователя и его токен
-        return $this->respondUserWithToken($user, $token);
+        return response()->json([
+            'status' => config('app.success_status'),
+            'data' => [
+                'user' => $user,
+                'token' => [
+                    'access_token' => $token,
+                    'token_type' => 'bearer',
+                    'expires_in' => auth()->factory()->getTTL() * 60,
+                ],
+                'companies' => $companies
+            ]
+        ]);
     }
 
     /**
