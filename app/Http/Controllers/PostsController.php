@@ -125,7 +125,7 @@ class PostsController extends Controller {
 
         // Проверяем данные запроса
         $validator = Validator::make($req->all(), [
-            'title' => 'string|min:15|max:200',
+            'title' => 'string|min:5|max:200',
             'body' => '',
         ]);
         // Прокидываем ошибки, если данные не прошли валидацию

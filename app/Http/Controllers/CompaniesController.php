@@ -68,7 +68,7 @@ class CompaniesController extends Controller {
      */
     public function getOne($slug) {
         // Получаем компанию по slug
-        $company = Company::where('slug', $slug)->get();
+        $company = Company::where('slug', $slug)->first();
         // Проверяем есть ли компанию
         if (!$company) {
             return response()->json([
