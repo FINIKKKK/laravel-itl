@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Comment;
 use App\Models\Favorite;
+use App\Models\Like;
 use App\Models\Post;
 use App\Models\Section;
 use Illuminate\Http\Request;
@@ -122,9 +123,23 @@ class PostsController extends Controller {
             else {
                 $post->isFavorite = false;
             }
+
+            // Проверяем, есть ли лайк на посте
+            $like = Like::where('user_id', $user->id)
+                ->where('liketable_id', $post->id)
+                ->where('liketable_type', Post::class)
+                ->first();
+            // Если есть, то помечаем поле, как отмеченное
+            if ($like) {
+                $post->isLike = true;
+            } // Если нету, то помечаем поле, как неотмеченное
+            else {
+                $post->isLike = false;
+            }
         } // Если пользователь неавторизован
         else {
             $post->isFavorite = false;
+            $post->isLike = false;
         }
 
         // Возвращаем пост

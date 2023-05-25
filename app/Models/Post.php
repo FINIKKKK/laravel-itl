@@ -28,4 +28,8 @@ class Post extends Model {
     public function favorites() {
         return $this->morphMany(Favorite::class, 'favoritable');
     }
+
+    public function likes() {
+        return $this->morphMany(Like::class, 'liketable');
+    }
 }

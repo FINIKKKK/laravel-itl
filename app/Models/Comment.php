@@ -4,11 +4,11 @@ namespace App\Models;
 
 use App\Models\Post;
 use App\Models\User;
+use App\Models\Like;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Comment extends Model
-{
+class Comment extends Model {
     use HasFactory;
 
     protected $guarded = false;
@@ -23,5 +23,9 @@ class Comment extends Model
 
     public function parentComment() {
         return $this->belongsTo(Comment::class);
+    }
+
+    public function likes() {
+        return $this->morphMany(Like::class, 'liketable');
     }
 }

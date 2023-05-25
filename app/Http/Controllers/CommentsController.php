@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Comment;
+use App\Models\Favorite;
+use App\Models\Like;
 use App\Models\Post;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -79,10 +81,31 @@ class CommentsController extends Controller {
             ->orderBy('created_at', 'desc')
             ->get();
 
+        // Получаем пользователя
+        $user = auth()->user();
+
         // Пробегаймся по комментриям, и добавляем к какждому дочерние комментарии
         foreach ($comments as $comment) {
             $children = Comment::where('parent_comment_id', $comment->id)->with('user')->get();
             $comment->children = $children;
+            // Если пользователь авторизован
+            if ($user) {
+                // Проверяем, есть ли лайк на посте
+                $like = Like::where('user_id', $user->id)
+                    ->where('liketable_id', $comment->id)
+                    ->where('liketable_type', Comment::class)
+                    ->first();
+                // Если есть, то помечаем поле, как отмеченное
+                if ($like) {
+                    $comment->isLike = true;
+                } // Если нету, то помечаем поле, как неотмеченное
+                else {
+                    $comment->isLike = false;
+                }
+            } // Если пользователь неавторизован
+            else {
+                $comment->isFavorite = false;
+            }
         }
 
         // Возвращаем комментарии

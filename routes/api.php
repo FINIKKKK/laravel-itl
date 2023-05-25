@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CommentsController;
 use App\Http\Controllers\CompaniesController;
 use App\Http\Controllers\FavoritesController;
+use App\Http\Controllers\LikesController;
 use App\Http\Controllers\PostsController;
 use App\Http\Controllers\SectionsController;
 use App\Http\Controllers\UploadFileController;
@@ -221,9 +222,9 @@ Route::controller(SectionsController::class)
 
 
 /*
-|--------------------------------------------------------------------------
+|-------------------------------------------------------------
 | Избранное
-|--------------------------------------------------------------------------
+|-------------------------------------------------------------
 */
 Route::controller(FavoritesController::class)
     ->prefix('favorites')
@@ -232,12 +233,36 @@ Route::controller(FavoritesController::class)
         // Группа маршрутов, требующих аутентификации
         Route::middleware('auth')->group(function () {
             /**
-             * Создание нового
+             * Добавление или удаление элемента из избранного
              */
-            Route::name('add')->post('/', 'add');
+            Route::name('addOrRemove')->post('/', 'addOrRemove');
 
             /**
-             * Получение всех
+             * Получить все избранные элементы пользователя
+             */
+            Route::name('getAll')->get('/', 'getAll');
+        });
+    });
+
+
+/*
+|-------------------------------------------------------------
+| Лайки
+|-------------------------------------------------------------
+*/
+Route::controller(LikesController::class)
+    ->prefix('likes')
+    ->name('likes.')
+    ->group(callback: function () {
+        // Группа маршрутов, требующих аутентификации
+        Route::middleware('auth')->group(function () {
+            /**
+             * Добавление или убрать лайк
+             */
+            Route::name('addOrRemove')->post('/', 'addOrRemove');
+
+            /**
+             * Получить все лайканные элементы пользователя
              */
             Route::name('getAll')->get('/', 'getAll');
         });

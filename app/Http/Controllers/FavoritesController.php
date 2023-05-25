@@ -9,9 +9,9 @@ use Illuminate\Support\Facades\Validator;
 
 class FavoritesController extends Controller {
     /**
-     * Добавить элемент в избранное
+     * Добавление или удаление элемента из избранного
      */
-    public function add(Request $req) {
+    public function addOrRemove(Request $req) {
         // Проверяем данные запроса
         $validator = Validator::make($req->all(), [
             'item_id' => 'required|integer',
@@ -69,14 +69,14 @@ class FavoritesController extends Controller {
     }
 
     /**
-     * Получить все избранные элементы
+     * Получить все избранные элементы пользователя
      */
     public function getAll(Request $req) {
         // Получаем пользователя
         $user = auth()->user();
 
         // Получение всех избранных элементов пользователя
-        $favorites = Favorite::where('user_id', $user->id)->get();
+        $favorites = Favorite::where('user_id', $user->id)->with('favoritable')->get();
 
         // Добавляем для каждого элемента дополнительное поле - тип элемента
         foreach ($favorites as $favorite) {
