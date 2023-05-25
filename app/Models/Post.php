@@ -4,11 +4,11 @@ namespace App\Models;
 
 use App\Models\Comment;
 use App\Models\User;
+use App\Models\Section;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Post extends Model
-{
+class Post extends Model {
     use HasFactory;
 
     protected $guarded = false;
@@ -22,6 +22,10 @@ class Post extends Model
     }
 
     public function section() {
-        return $this->belongsTo(Company::class);
+        return $this->belongsTo(Section::class);
+    }
+
+    public function favorites() {
+        return $this->morphMany(Favorite::class, 'favoritable');
     }
 }

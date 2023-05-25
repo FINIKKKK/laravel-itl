@@ -93,8 +93,8 @@ class SectionsController extends Controller {
      * Получение одного раздела по id
      */
     public function getOne($id) {
-        // Получаем раздел по id и привязываем информацию о пользователе
-        $section = Section::with('user')->find($id);
+        // Получаем раздел по id и привязываем информацию о пользователе и разделе
+        $section = Section::with('user')->with(['parent:id,title'])->find($id);
         // Проверяем есть ли такой раздел
         if (!$section->count()) {
             return response()->json([

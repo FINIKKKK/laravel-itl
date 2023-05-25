@@ -3,10 +3,12 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CommentsController;
 use App\Http\Controllers\CompaniesController;
+use App\Http\Controllers\FavoritesController;
 use App\Http\Controllers\PostsController;
 use App\Http\Controllers\SectionsController;
 use App\Http\Controllers\UploadFileController;
 use App\Http\Controllers\UsersController;
+use App\Models\Favorite;
 use Illuminate\Support\Facades\Route;
 
 
@@ -214,6 +216,30 @@ Route::controller(SectionsController::class)
              * Удаление раздела по id
              */
             Route::name('delete')->delete('/{id}', 'delete');
+        });
+    });
+
+
+/*
+|--------------------------------------------------------------------------
+| Избранное
+|--------------------------------------------------------------------------
+*/
+Route::controller(FavoritesController::class)
+    ->prefix('favorites')
+    ->name('favorites.')
+    ->group(callback: function () {
+        // Группа маршрутов, требующих аутентификации
+        Route::middleware('auth')->group(function () {
+            /**
+             * Создание нового
+             */
+            Route::name('add')->post('/', 'add');
+
+            /**
+             * Получение всех
+             */
+            Route::name('getAll')->get('/', 'getAll');
         });
     });
 

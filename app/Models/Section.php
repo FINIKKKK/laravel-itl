@@ -5,12 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Section extends Model
-{
+class Section extends Model {
     use HasFactory;
 
     protected $guarded = false;
-
 
     public function company() {
         return $this->belongsTo(Company::class);
@@ -26,5 +24,13 @@ class Section extends Model
 
     public function sections() {
         return $this->hasMany(Section::class);
+    }
+
+    public function parent() {
+        return $this->belongsTo(Section::class);
+    }
+
+    public function favorites() {
+        return $this->morphMany(Favorite::class, 'favoritable');
     }
 }

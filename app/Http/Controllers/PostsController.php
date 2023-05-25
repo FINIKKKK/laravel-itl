@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Comment;
+use App\Models\Favorite;
 use App\Models\Post;
 use App\Models\Section;
 use Illuminate\Http\Request;
@@ -47,6 +48,7 @@ class PostsController extends Controller {
             'user_id' => $user->id,
             'section_id' => $req->section_id,
         ]);
+
         // Возвращаем пост
         return response()->json([
             'status' => config('app.success_status'),
@@ -90,8 +92,8 @@ class PostsController extends Controller {
      * Получение одного поста по id
      */
     public function getOne($id) {
-        // Получаем пост по id и привязываем информацию о пользователе
-        $post = Post::with('user')->find($id);
+        // Получаем пост по id и привязываем информацию о пользователе и разделе
+        $post = Post::with('user')->with(['section:id,title'])->find($id);
         // Проверяем есть ли такой пост
         if (!$post) {
             return response()->json([
@@ -102,6 +104,29 @@ class PostsController extends Controller {
 
         // Конвертируем body у поста из строки в массив
         $post->body = json_decode($post->body);
+
+        // Получаем пользователя
+        $user = auth()->user();
+
+        // Если пользователь авторизован
+        if ($user) {
+            // Проверяем, существует ли пост в избранном пользователя
+            $favorite = Favorite::where('user_id', $user->id)
+                ->where('favoritable_id', $post->id)
+                ->where('favoritable_type', Post::class)
+                ->first();
+            // Если есть, то помечаем поле, как отмеченное
+            if ($favorite) {
+                $post->isFavorite = true;
+            } // Если нету, то помечаем поле, как неотмеченное
+            else {
+                $post->isFavorite = false;
+            }
+        } // Если пользователь неавторизован
+        else {
+            $post->isFavorite = false;
+        }
+
         // Возвращаем пост
         return response()->json([
             'status' => config('app.success_status'),
