@@ -93,7 +93,9 @@ class AuthController extends BaseController {
         $user = auth()->user();
 
         // Получаем компании пользователя
-        $companies = Company::where('user_id', $user->id)->get();
+        //        $companies = Company::where('user_id', $user->id)->get();
+        $user = User::with('companies')->find($user->id);
+//        $companies = $user->companies;
 
         // Возвращаем данные пользователя и его токен
         return response()->json([
@@ -105,7 +107,6 @@ class AuthController extends BaseController {
                     'token_type' => 'bearer',
                     'expires_in' => auth()->factory()->getTTL() * 60,
                 ],
-                'companies' => $companies
             ]
         ]);
     }

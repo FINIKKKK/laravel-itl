@@ -28,11 +28,8 @@ class CompaniesController extends Controller {
         }
 
 
-
         // Получаем текущего пользователя
         $user = auth()->user();
-
-
 
 
         // Создаем slug
@@ -111,7 +108,15 @@ class CompaniesController extends Controller {
         $user = auth()->user();
 
         // Получаем список компаний пользователя
-        $companies = Company::where('user_id', $user->id)->get();
+        $user = User::with('companies.users')->find($user->id);
+
+        // Форматируем данные
+        $companies = $user->companies->map(function ($company) {
+            $company->user_count = $company->users->count();
+            unset($company->users);
+            return $company;
+        });
+
         // Возвращаем список компаний пользователя
         return response()->json([
             'status' => config('app.success_status'),
@@ -136,6 +141,50 @@ class CompaniesController extends Controller {
         return response()->json([
             'status' => config('app.success_status'),
             'data' => $company,
+        ], config('app.success_status'));
+    }
+
+    /**
+     * Получение компании по slug
+     */
+    public function getUsers(Request $req) {
+        $company = Company::find($req->company_id);
+        // Получаем компанию по slug
+        $users = $company->users;
+
+        // Возвращаем список компаний пользователя
+        return response()->json([
+            'status' => config('app.success_status'),
+            'data' => $users,
+        ], config('app.success_status'));
+    }
+
+    /**
+     * Получение компании по slug
+     */
+    public function removeUser(Request $req) {
+        // Проверяем данные запроса
+        $validator = Validator::make($req->all(), [
+            'user_id' => 'required|integer',
+            'company_id' => 'required|integer',
+        ]);
+        // Прокидываем ошибки, если данные не прошли валидацию
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => config('app.error_status'),
+                'message' => $validator->errors()->all()
+            ], config('app.error_status'));
+        }
+
+        $user = User::find($req->user_id);
+        $company = Company::find($req->company_id);
+
+        $user->companies()->detach($company->id);
+
+        // Возвращаем список компаний пользователя
+        return response()->json([
+            'status' => config('app.success_status'),
+            'data' => ['Пользователь удален из компании'],
         ], config('app.success_status'));
     }
 }

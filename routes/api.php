@@ -95,6 +95,16 @@ Route::controller(CompaniesController::class)
          */
         Route::name('addUser')->post('/addUser', 'addUser');
 
+        /**
+         * Добавить пользователя к компании
+         */
+        Route::name('removeUser')->delete('/removeUser', 'removeUser');
+
+        /**
+         * Добавить пользователя к компании
+         */
+        Route::name('getUsers')->get('/getUsers', 'getUsers');
+
 
         // Группа маршрутов, требующих аутентификации
         Route::middleware('auth')->group(function () {
