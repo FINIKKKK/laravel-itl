@@ -12,7 +12,11 @@ class Company extends Model
 
     protected $guarded = false;
 
-    public function user() {
+    public function owner() {
         return $this->belongsTo(User::class);
+    }
+
+    public function users() {
+        return $this->belongsToMany(User::class, 'user_company', 'company_id', 'user_id')->withPivot('role_id');
     }
 }

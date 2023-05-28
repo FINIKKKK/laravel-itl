@@ -45,7 +45,7 @@ class User extends Authenticatable implements JWTSubject
     }
 
     public function companies() {
-        return $this->hasMany(Company::class);
+        return $this->belongsToMany(Company::class, 'user_company', 'user_id', 'company_id')->withPivot('role_id');
     }
 
     public function posts() {

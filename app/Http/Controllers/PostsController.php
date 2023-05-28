@@ -93,8 +93,14 @@ class PostsController extends Controller {
      * Получение одного поста по id
      */
     public function getOne($id) {
+
+        $user = auth()->user();
         // Получаем пост по id и привязываем информацию о пользователе и разделе
-        $post = Post::with('user')->with(['section:id,title'])->find($id);
+        $post = Post::with('user')->with(['section:id,title','likes'=> function($query) use ($user) {
+            $query->where('users.id', $user->id);
+        }, 'favorites' => function($query) use ($user) {
+            $query->where('users.id', $user->id);
+        }])->find($id);
         // Проверяем есть ли такой пост
         if (!$post) {
             return response()->json([

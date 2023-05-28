@@ -26,10 +26,10 @@ class Post extends Model {
     }
 
     public function favorites() {
-        return $this->morphMany(Favorite::class, 'favoritable');
+        return $this->morphToMany(User::class, 'favoritable', 'favorites');
     }
 
     public function likes() {
-        return $this->morphMany(Like::class, 'liketable');
+        return $this->morphToMany(User::class, 'liketable', 'likes');
     }
 }

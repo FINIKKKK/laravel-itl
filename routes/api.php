@@ -90,6 +90,12 @@ Route::controller(CompaniesController::class)
          */
         Route::name('getAll')->get('/', 'getAll');
 
+        /**
+         * Добавить пользователя к компании
+         */
+        Route::name('addUser')->post('/addUser', 'addUser');
+
+
         // Группа маршрутов, требующих аутентификации
         Route::middleware('auth')->group(function () {
             /**
