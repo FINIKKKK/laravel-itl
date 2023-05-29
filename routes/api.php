@@ -85,27 +85,6 @@ Route::controller(CompaniesController::class)
     ->prefix('companies')
     ->name('companies.')
     ->group(callback: function () {
-        /**
-         * Получение всех компаний
-         */
-        Route::name('getAll')->get('/', 'getAll');
-
-        /**
-         * Добавить пользователя к компании
-         */
-        Route::name('addUser')->post('/addUser', 'addUser');
-
-        /**
-         * Добавить пользователя к компании
-         */
-        Route::name('removeUser')->delete('/removeUser', 'removeUser');
-
-        /**
-         * Добавить пользователя к компании
-         */
-        Route::name('getUsers')->get('/getUsers', 'getUsers');
-
-
         // Группа маршрутов, требующих аутентификации
         Route::middleware('auth')->group(function () {
             /**
@@ -114,9 +93,37 @@ Route::controller(CompaniesController::class)
             Route::name('create')->post('/', 'create');
 
             /**
+             * Получение всех компаний пользователя
+             */
+            Route::name('getAll')->get('/', 'getAll');
+
+            /**
              * Получении компании по slug
              */
             Route::name('getOne')->get('/{slug}', 'getOne');
+
+            // Группа маршрутов, связанных с пользователями компании
+            Route::prefix('users')->name('users.')->group(function () {
+                /**
+                 * Добавление пользователя в компанию
+                 */
+                Route::name('addUser')->post('/', 'addUser');
+
+                /**
+                 * Получение всех пользователей компании
+                 */
+                Route::name('getUsers')->get('/{id}', 'getUsers');
+
+                /**
+                 * Изменение роли у пользователя в компании
+                 */
+                Route::name('changeRoleUser')->patch('/role', 'changeRoleUser');
+
+                /**
+                 * Удаление пользователя из компании
+                 */
+                Route::name('removeUser')->delete('/', 'removeUser');
+            });
         });
     });
 

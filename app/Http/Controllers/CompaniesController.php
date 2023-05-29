@@ -27,10 +27,8 @@ class CompaniesController extends Controller {
             ], config('app.error_status'));
         }
 
-
         // Получаем текущего пользователя
         $user = auth()->user();
-
 
         // Создаем slug
         $slug = Str::slug($req->name);
@@ -43,60 +41,15 @@ class CompaniesController extends Controller {
             'user_id' => $user->id,
         ]);
 
-        $role = Role::find(1);
+        // Получаем роль (модератор)
+        $role = Role::findOrFail(1);
+        // Добавляем роль к пользователю в этой компании
         $user->companies()->attach($company, ['role_id' => $role->id]);
 
         // Возвращаем компанию
         return response()->json([
             'status' => config('app.success_status'),
             'data' => $company,
-        ], config('app.success_status'));
-    }
-
-    /**
-     * Добавить поьзователя к компании
-     */
-    public function addUser(Request $req) {
-        // Проверяем данные запроса
-        $validator = Validator::make($req->all(), [
-            'user_id' => 'required|integer',
-            'company_id' => 'required|integer',
-        ]);
-        // Прокидываем ошибки, если данные не прошли валидацию
-        if ($validator->fails()) {
-            return response()->json([
-                'status' => config('app.error_status'),
-                'message' => $validator->errors()->all()
-            ], config('app.error_status'));
-        }
-
-
-        // Получаем пользователя по id
-        $user = User::find($req->user_id);
-        // Проверяем есть ли пользователя
-        if (!$user) {
-            return response()->json([
-                'status' => config('app.error_status'),
-                'message' => ['Пользователь не найден'],
-            ], config('app.error_status'));
-        }
-
-        // Получаем компанию по id
-        $company = Company::find($req->company_id);
-        // Проверяем есть ли компанию
-        if (!$company) {
-            return response()->json([
-                'status' => config('app.error_status'),
-                'message' => ['Компания не найдена'],
-            ], config('app.error_status'));
-        }
-
-        $user->companies()->attach($company, ['role_id' => 3]);
-
-        // Возвращаем компанию
-        return response()->json([
-            'status' => config('app.success_status'),
-            'data' => ['Пользователь добавлен к компании'],
         ], config('app.success_status'));
     }
 
@@ -110,9 +63,9 @@ class CompaniesController extends Controller {
         // Получаем список компаний пользователя
         $user = User::with('companies.users')->find($user->id);
 
-        // Форматируем данные
+        // Добавляем поле - количество пользователей в компании
         $companies = $user->companies->map(function ($company) {
-            $company->user_count = $company->users->count();
+            $company->users_count = $company->users->count();
             unset($company->users);
             return $company;
         });
@@ -128,9 +81,8 @@ class CompaniesController extends Controller {
      * Получение компании по slug
      */
     public function getOne($slug) {
-        // Получаем компанию по slug
-        $company = Company::where('slug', $slug)->first();
         // Проверяем есть ли компанию
+        $company = Company::where('slug', $slug)->first();
         if (!$company) {
             return response()->json([
                 'status' => config('app.error_status'),
@@ -145,14 +97,69 @@ class CompaniesController extends Controller {
     }
 
     /**
-     * Получение компании по slug
+     * Добавление поьзователя к компании
      */
-    public function getUsers(Request $req) {
+    public function addUser(Request $req) {
+        // Проверяем данные запроса
+        $validator = Validator::make($req->all(), [
+            'user_id' => 'required|integer',
+            'company_id' => 'required|integer',
+        ]);
+        // Прокидываем ошибки, если данные не прошли валидацию
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => config('app.error_status'),
+                'message' => $validator->errors()->all()
+            ], config('app.error_status'));
+        }
+
+        // Проверяем есть ли пользователь
+        $user = User::find($req->user_id);
+        if (!$user) {
+            return response()->json([
+                'status' => config('app.error_status'),
+                'message' => ['Пользователь не найден'],
+            ], config('app.error_status'));
+        }
+
+        // Проверяем есть ли компания
         $company = Company::find($req->company_id);
-        // Получаем компанию по slug
+        if (!$company) {
+            return response()->json([
+                'status' => config('app.error_status'),
+                'message' => ['Компания не найдена'],
+            ], config('app.error_status'));
+        }
+
+        // Проверяем есть ли роль (пользователь)
+        $role = Role::findOrFail(3);
+        // Добавляем пользователя к компании с ролью (пользователь)
+        $user->companies()->attach($company, ['role_id' => $role->id]);
+
+        // Возвращаем сообщение об успешном добавлении пользователя
+        return response()->json([
+            'status' => config('app.success_status'),
+            'data' => ['Пользователь добавлен к компании'],
+        ], config('app.success_status'));
+    }
+
+    /**
+     * Получение всех пользователей компании
+     */
+    public function getUsers($id) {
+        // Проверяем есть ли компания
+        $company = Company::find($id);
+        if (!$company) {
+            return response()->json([
+                'status' => config('app.error_status'),
+                'message' => 'Компания не найден',
+            ], config('app.error_status'));
+        }
+
+        // Получаем пользователей компании
         $users = $company->users;
 
-        // Возвращаем список компаний пользователя
+        // Возвращаем список пользователей
         return response()->json([
             'status' => config('app.success_status'),
             'data' => $users,
@@ -160,7 +167,62 @@ class CompaniesController extends Controller {
     }
 
     /**
-     * Получение компании по slug
+     * Изменение роли у пользователя в компании
+     */
+    public function changeRoleUser(Request $req) {
+        // Проверяем данные запроса
+        $validator = Validator::make($req->all(), [
+            'role_id' => 'required|integer',
+            'user_id' => 'required|integer',
+            'company_id' => 'required|integer',
+        ]);
+        // Прокидываем ошибки, если данные не прошли валидацию
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => config('app.error_status'),
+                'message' => $validator->errors()->all()
+            ], config('app.error_status'));
+        }
+
+        // Проверяем, существует ли указанная роль
+        $role = Role::find($req->role_id);
+        if (!$role) {
+            return response()->json([
+                'status' => config('app.error_status'),
+                'message' => 'Указанная роль не существует.'
+            ], config('app.error_status'));
+        }
+
+        // Проверяем есть ли пользователь
+        $user = User::find($req->user_id);
+        if (!$user) {
+            return response()->json([
+                'status' => config('app.error_status'),
+                'message' => ['Пользователь не найден'],
+            ], config('app.error_status'));
+        }
+
+        // Проверяем есть ли компания
+        $company = Company::find($req->company_id);
+        if (!$company) {
+            return response()->json([
+                'status' => config('app.error_status'),
+                'message' => ['Компания не найдена'],
+            ], config('app.error_status'));
+        }
+
+        // Обновляем роль пользователя для данной компании
+        $user->companies()->updateExistingPivot($req->company_id, ['role_id' => $req->role_id]);
+
+        // Возвращаем сообщение об успешном изменении роли пользователя
+        return response()->json([
+            'status' => config('app.success_status'),
+            'data' => ['Роль пользователя успешно обновлена'],
+        ], config('app.success_status'));
+    }
+
+    /**
+     * Удаление пользователя из компании
      */
     public function removeUser(Request $req) {
         // Проверяем данные запроса
@@ -176,12 +238,28 @@ class CompaniesController extends Controller {
             ], config('app.error_status'));
         }
 
+        // Проверяем есть ли пользователь
         $user = User::find($req->user_id);
-        $company = Company::find($req->company_id);
+        if (!$user) {
+            return response()->json([
+                'status' => config('app.error_status'),
+                'message' => ['Пользователь не найден'],
+            ], config('app.error_status'));
+        }
 
+        // Проверяем есть ли компания
+        $company = Company::find($req->company_id);
+        if (!$company) {
+            return response()->json([
+                'status' => config('app.error_status'),
+                'message' => ['Компания не найдена'],
+            ], config('app.error_status'));
+        }
+
+        // Удаляем пользователя из компании
         $user->companies()->detach($company->id);
 
-        // Возвращаем список компаний пользователя
+        // Возвращаем сообщение об успешном удалении пользователя из компании
         return response()->json([
             'status' => config('app.success_status'),
             'data' => ['Пользователь удален из компании'],
