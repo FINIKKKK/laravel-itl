@@ -13,16 +13,19 @@ class Post extends Model {
 
     protected $guarded = false;
 
-    public function user() {
+    // Автор поста
+    public function author() {
         return $this->belongsTo(User::class);
     }
 
-    public function comments() {
-        return $this->hasMany(Comment::class);
-    }
-
+    // Раздел у поста
     public function section() {
         return $this->belongsTo(Section::class);
+    }
+
+    // Комментарии у поста
+    public function comments() {
+        return $this->hasMany(Comment::class);
     }
 
     public function favorites() {

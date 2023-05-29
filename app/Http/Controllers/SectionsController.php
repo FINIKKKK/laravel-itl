@@ -13,9 +13,8 @@ class SectionsController extends Controller {
      * Создание раздела
      */
     public function create(Request $req) {
-        // Получаем компанию по id
-        $company = Company::find($req->company_id);
         // Проверяем есть ли компанию
+        $company = Company::find($req->get('company_id'));
         if (!$company) {
             return response()->json([
                 'status' => config('app.error_status'),
@@ -38,17 +37,15 @@ class SectionsController extends Controller {
             ], config('app.error_status'));
         }
 
-        // Получаем текущего пользователя
-        $user = auth()->user();
-
         // Создаем раздел (касты)
         $section = Section::create([
-            'title' => $req->title,
-            'body' => json_encode($req->body),
-            'user_id' => $user->id,
-            'company_id' => $req->company_id,
-            'parent_id' => $req->parent_id,
+            'title' => $req->get('title'),
+            'body' => json_encode($req->get('body')),
+            'user_id' => $req->user()->id,
+            'company_id' => $req->get('company_id'),
+            'parent_id' => $req->get('parent_id'),
         ]);
+
         // Возвращаем раздел
         return response()->json([
             'status' => config('app.success_status'),
@@ -93,9 +90,8 @@ class SectionsController extends Controller {
      * Получение одного раздела по id
      */
     public function getOne($id) {
-        // Получаем раздел по id и привязываем информацию о пользователе и разделе
-        $section = Section::with('user')->with(['parent:id,title'])->find($id);
         // Проверяем есть ли такой раздел
+        $section = Section::with('user')->with(['parent:id,title'])->find($id);
         if (!$section->count()) {
             return response()->json([
                 'status' => config('app.error_status'),
@@ -108,8 +104,9 @@ class SectionsController extends Controller {
 
         // Получаем дочерние разделы
         $childSections = Section::where('parent_id', $id)->get();
+        // Получаем дочерние посты
         $posts = Post::where('section_id', $id)->get();
-
+        // Создаем поле data и прокидываем данные
         $section->data = [
             'sections' => $childSections,
             'posts' => $posts,
@@ -126,9 +123,8 @@ class SectionsController extends Controller {
      * Обновление раздела по id
      */
     public function update(Request $req, $id) {
-        // Получаем раздел по id
-        $section = Section::find($id);
         // Проверяем есть ли раздел
+        $section = Section::find($id);
         if (!$section) {
             return response()->json([
                 'status' => config('app.error_status'),
@@ -151,6 +147,7 @@ class SectionsController extends Controller {
 
         // Обновляем раздел
         $section->update($req->all());
+
         // Возвращаем обновленный раздел
         return response()->json([
             'status' => config('app.success_status'),
@@ -162,9 +159,8 @@ class SectionsController extends Controller {
      * Удаление раздела по id
      */
     public function delete($id) {
-        // Получаем раздел по id
-        $section = Section::find($id);
         // Проверяем есть ли раздел
+        $section = Section::find($id);
         if (!$section) {
             return response()->json([
                 'status' => config('app.error_status'),
@@ -172,8 +168,6 @@ class SectionsController extends Controller {
             ], config('app.error_status'));
         }
 
-        // Удаляем все посты, связанные с разделом
-        //        Post::where('section_id', $id)->delete();
         // Удаляем раздел
         $section->delete();
 

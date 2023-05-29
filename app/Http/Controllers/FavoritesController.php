@@ -26,7 +26,7 @@ class FavoritesController extends Controller {
         }
 
         // Получаем пост по id
-        $post = Post::find($req->item_id);
+        $post = Post::find($req->get('item_id'));
         // Проверяем есть ли пост
         if (!$post) {
             return response()->json([
@@ -35,11 +35,8 @@ class FavoritesController extends Controller {
             ], config('app.error_status'));
         }
 
-        // Получаем пользователя
-        $user = auth()->user();
-
         // Проверяем, существует ли уже элемент в избранном пользователя
-        $favorite = Favorite::where('user_id', $user->id)
+        $favorite = Favorite::where('user_id', $req->user()->id)
             ->where('favoritable_id', $post->id)
             ->where('favoritable_type', Post::class)
             ->first();
@@ -55,7 +52,7 @@ class FavoritesController extends Controller {
         // Если нет, то добавляем
         else {
             $favorite = Favorite::create([
-                'user_id' => $user->id,
+                'user_id' => $req->user()->id,
                 'favoritable_id' => $post->id,
                 'favoritable_type' => Post::class
             ]);
@@ -72,11 +69,8 @@ class FavoritesController extends Controller {
      * Получить все избранные элементы пользователя
      */
     public function getAll(Request $req) {
-        // Получаем пользователя
-        $user = auth()->user();
-
         // Получение всех избранных элементов пользователя
-        $favorites = Favorite::where('user_id', $user->id)->with('favoritable')->get();
+        $favorites = Favorite::where('user_id', $req->user()->id)->with('favoritable')->get();
 
         // Добавляем для каждого элемента дополнительное поле - тип элемента
         foreach ($favorites as $favorite) {

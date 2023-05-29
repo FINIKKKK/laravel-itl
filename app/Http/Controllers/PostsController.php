@@ -29,9 +29,8 @@ class PostsController extends Controller {
             ], config('app.error_status'));
         }
 
-        // Получаем раздел по id
-        $section = Section::find($req->section_id);
         // Проверяем есть ли раздел
+        $section = Section::find($req->get('section_id'));
         if (!$section) {
             return response()->json([
                 'status' => config('app.error_status'),
@@ -39,15 +38,12 @@ class PostsController extends Controller {
             ], config('app.error_status'));
         }
 
-        // Получаем текущего пользователя
-        $user = auth()->user();
-
         // Создаем пост
         $post = Post::create([
-            'title' => $req->title,
-            'body' => json_encode($req->body),
-            'user_id' => $user->id,
-            'section_id' => $req->section_id,
+            'title' => $req->get('title'),
+            'body' => json_encode($req->get('body')),
+            'user_id' => $req->user()->id,
+            'section_id' => $req->get('section_id'),
         ]);
 
         // Возвращаем пост
@@ -77,7 +73,7 @@ class PostsController extends Controller {
         // + Добавляем информацию об авторе поста
         // + Без поля body
         // + Сортируем по дате (сначала новые)
-        $posts = Post::where('section_id', $req->section_id)->with('user')
+        $posts = Post::where('section_id', $req->get('section_id'))->with('user')
             ->without('body')
             ->orderBy('created_at', 'desc')
             ->get();
@@ -92,9 +88,10 @@ class PostsController extends Controller {
     /**
      * Получение одного поста по id
      */
-    public function getOne($id) {
+    public function getOne(Request $req, $id) {
+        // Получаем пользователя
+        $user = $req->user();
 
-        $user = auth()->user();
         // Получаем пост по id и привязываем информацию о пользователе и разделе
         $post = Post::with('user')->with(['section:id,title','likes'=> function($query) use ($user) {
             $query->where('users.id', $user->id);
@@ -111,9 +108,6 @@ class PostsController extends Controller {
 
         // Конвертируем body у поста из строки в массив
         $post->body = json_decode($post->body);
-
-        // Получаем пользователя
-        $user = auth()->user();
 
         // Если пользователь авторизован
         if ($user) {
@@ -159,9 +153,8 @@ class PostsController extends Controller {
      * Обновление поста по id
      */
     public function update(Request $req, $id) {
-        // Получаем пост по id
-        $post = Post::find($id);
         // Проверяем есть ли пост
+        $post = Post::find($id);
         if (!$post) {
             return response()->json([
                 'status' => config('app.error_status'),
@@ -184,6 +177,7 @@ class PostsController extends Controller {
 
         // Обновляем пост
         $post->update($req->all());
+
         // Возвращаем обновленный пост
         return response()->json([
             'status' => config('app.success_status'),
@@ -195,9 +189,8 @@ class PostsController extends Controller {
      * Удаление поста по id
      */
     public function delete($id) {
-        // Получаем пост по id
-        $post = Post::find($id);
         // Проверяем есть ли пост
+        $post = Post::find($id);
         if (!$post) {
             return response()->json([
                 'status' => config('app.error_status'),
@@ -205,8 +198,6 @@ class PostsController extends Controller {
             ], config('app.error_status'));
         }
 
-        // Удаляем все комментарии, связанные с постом
-        Comment::where('post_id', $id)->delete();
         // Удаляем пост
         $post->delete();
 

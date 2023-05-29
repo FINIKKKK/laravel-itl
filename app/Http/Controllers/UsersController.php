@@ -37,15 +37,15 @@ class UsersController extends Controller {
         }
 
         // Получаем пользователя
-        $user = auth()->user();
+        $user = $req->user();
 
         // Если нужно, то обновляем аватар
-        if ($req->avatar) {
+        if ($req->get('avatar')) {
             // Экземляр конроллера для загрузки файлов
             $uploadController = new UploadFileController();
             // Создаем запрос с путями для загрузки
             $uploadReq = new Request([
-                'image' => $req->avatar,
+                'image' => $req->get('avatar'),
                 'path' => config('app.img_path_avatar')
             ]);
             // Загружаем файл и получаем его путь
@@ -88,10 +88,10 @@ class UsersController extends Controller {
         }
 
         // Получаем пользователя
-        $user = auth()->user();
+        $user = $req->user();
 
         // Проверяем совпадают ли пароли
-        if (!Hash::check($req->old_password, $user->password)) {
+        if (!Hash::check($req->get('old_password'), $user->password)) {
             return response()->json([
                 'status' => config('app.error_status'),
                 'message' => ['Неверный пароль'],
@@ -100,7 +100,7 @@ class UsersController extends Controller {
 
         // Обновляем пароль
         $user->update([
-            'password' => $req->password
+            'password' => $req->get('password')
         ]);
 
         // Возвращаем обновленный пост

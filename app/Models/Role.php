@@ -10,6 +10,7 @@ class Role extends Model {
 
     public $timestamps = false;
 
+    // Пользователи
     public function users() {
         return $this->belongsToMany(User::class, 'user_company', 'role_id', 'user_id')->withPivot('company_id');
     }

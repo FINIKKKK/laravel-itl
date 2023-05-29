@@ -13,18 +13,22 @@ class Comment extends Model {
 
     protected $guarded = false;
 
-    public function user() {
+    // Автор комментария
+    public function author() {
         return $this->belongsTo(User::class);
     }
 
+    // Пост, у которого был оставлен этот комментарий
     public function post() {
         return $this->belongsTo(Post::class);
     }
 
+    // Родтельский комментарий, у которого был оставлен этот комментарий
     public function parentComment() {
         return $this->belongsTo(Comment::class);
     }
 
+    //
     public function likes() {
         return $this->morphMany(Like::class, 'liketable');
     }

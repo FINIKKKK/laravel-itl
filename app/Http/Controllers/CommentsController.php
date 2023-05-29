@@ -28,9 +28,8 @@ class CommentsController extends Controller {
             ], config('app.error_status'));
         }
 
-        // Получаем пост по id
-        $post = Post::find($req->post_id);
         // Проверяем есть ли пост
+        $post = Post::find($req->get('post_id'));
         if (!$post) {
             return response()->json([
                 'status' => config('app.error_status'),
@@ -38,16 +37,14 @@ class CommentsController extends Controller {
             ], config('app.error_status'));
         }
 
-        // Получаем текущего пользователя
-        $user = auth()->user();
-
-        // Создаем комментарий и подгдаем информацию об авторе комментария
+        // Создаем комментарий и подгружаем информацию об авторе комментария
         $comment = Comment::create([
-            'text' => $req->text,
-            'post_id' => $req->post_id,
-            'user_id' => $user->id,
-            'parent_comment_id' => $req->parent_id,
+            'text' => $req->get('text'),
+            'post_id' => $req->get('post_id'),
+            'user_id' => $req->user()->id,
+            'parent_comment_id' => $req->get('parent_id'),
         ])->load('user');
+
         // Возвращаем комментарий
         return response()->json([
             'status' => config('app.success_status'),
@@ -76,13 +73,13 @@ class CommentsController extends Controller {
         // + Привязываем информацио об авторе
         // + Сортируем по дате (сначала новые)
         $comments = Comment::whereNull('parent_comment_id')
-            ->where('post_id', $req->post_id)
+            ->where('post_id', $req->get('post_id'))
             ->with('user')
             ->orderBy('created_at', 'desc')
             ->get();
 
         // Получаем пользователя
-        $user = auth()->user();
+        $user = $req->user();
 
         // Пробегаймся по комментриям, и добавляем к какждому дочерние комментарии
         foreach ($comments as $comment) {
@@ -119,9 +116,8 @@ class CommentsController extends Controller {
      * Обновление комментария по id
      */
     public function update(Request $req, $id) {
-        // Получаем комментарий по id
-        $comment = Comment::find($id);
         // Проверяем есть ли комментарий
+        $comment = Comment::find($id);
         if (!$comment) {
             return response()->json([
                 'status' => config('app.error_status'),
@@ -143,6 +139,7 @@ class CommentsController extends Controller {
 
         // Обновляем комментарий
         $comment->update($req->all());
+
         // Возвращаем обновленный комментарий
         return response()->json([
             'status' => config('app.success_status'),
@@ -154,9 +151,8 @@ class CommentsController extends Controller {
      * Удаление комментария по id
      */
     public function delete($id) {
-        // Получаем комментарий по id
-        $comment = Comment::find($id);
         // Проверяем есть ли комментарий
+        $comment = Comment::find($id);
         if (!$comment) {
             return response()->json([
                 'status' => config('app.error_status'),
@@ -166,6 +162,7 @@ class CommentsController extends Controller {
 
         // Удаляем комментарий
         $comment->delete();
+
         // Возвращаем сообщение об успешном удалении комментария
         return response()->json([
             'status' => config('app.success_status'),

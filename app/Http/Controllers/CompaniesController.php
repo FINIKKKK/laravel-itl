@@ -27,17 +27,18 @@ class CompaniesController extends Controller {
             ], config('app.error_status'));
         }
 
+
         // Получаем текущего пользователя
-        $user = auth()->user();
+        $user = $req->user();
 
         // Создаем slug
-        $slug = Str::slug($req->name);
+        $slug = Str::slug($req->get('name'));
 
         // Создаем компанию
         $company = Company::create([
-            'name' => $req->name,
+            'name' => $req->get('name'),
             'slug' => $slug,
-            'url_address' => $req->url_address,
+            'url_address' => $req->get('url_address'),
             'user_id' => $user->id,
         ]);
 
@@ -56,9 +57,9 @@ class CompaniesController extends Controller {
     /**
      * Получение всех компаний пользователя
      */
-    public function getAll() {
+    public function getAll(Request $req) {
         // Получаем текущего пользователя
-        $user = auth()->user();
+        $user = $req->user();
 
         // Получаем список компаний пользователя
         $user = User::with('companies.users')->find($user->id);
@@ -89,6 +90,7 @@ class CompaniesController extends Controller {
                 'message' => ['Компания не найдена'],
             ], config('app.error_status'));
         }
+
         // Возвращаем список компаний пользователя
         return response()->json([
             'status' => config('app.success_status'),
@@ -114,7 +116,7 @@ class CompaniesController extends Controller {
         }
 
         // Проверяем есть ли пользователь
-        $user = User::find($req->user_id);
+        $user = User::find($req->get('user_id'));
         if (!$user) {
             return response()->json([
                 'status' => config('app.error_status'),
@@ -123,7 +125,7 @@ class CompaniesController extends Controller {
         }
 
         // Проверяем есть ли компания
-        $company = Company::find($req->company_id);
+        $company = Company::find($req->get('company_id'));
         if (!$company) {
             return response()->json([
                 'status' => config('app.error_status'),
@@ -185,7 +187,7 @@ class CompaniesController extends Controller {
         }
 
         // Проверяем, существует ли указанная роль
-        $role = Role::find($req->role_id);
+        $role = Role::find($req->get('role_id'));
         if (!$role) {
             return response()->json([
                 'status' => config('app.error_status'),
@@ -194,7 +196,7 @@ class CompaniesController extends Controller {
         }
 
         // Проверяем есть ли пользователь
-        $user = User::find($req->user_id);
+        $user = User::find($req->get('user_id'));
         if (!$user) {
             return response()->json([
                 'status' => config('app.error_status'),
@@ -203,7 +205,7 @@ class CompaniesController extends Controller {
         }
 
         // Проверяем есть ли компания
-        $company = Company::find($req->company_id);
+        $company = Company::find($req->get('company_id'));
         if (!$company) {
             return response()->json([
                 'status' => config('app.error_status'),
@@ -212,7 +214,7 @@ class CompaniesController extends Controller {
         }
 
         // Обновляем роль пользователя для данной компании
-        $user->companies()->updateExistingPivot($req->company_id, ['role_id' => $req->role_id]);
+        $user->companies()->updateExistingPivot($req->get('company_id'), ['role_id' => $req->get('role_id')]);
 
         // Возвращаем сообщение об успешном изменении роли пользователя
         return response()->json([
@@ -239,7 +241,7 @@ class CompaniesController extends Controller {
         }
 
         // Проверяем есть ли пользователь
-        $user = User::find($req->user_id);
+        $user = User::find($req->get('user_id'));
         if (!$user) {
             return response()->json([
                 'status' => config('app.error_status'),
@@ -248,7 +250,7 @@ class CompaniesController extends Controller {
         }
 
         // Проверяем есть ли компания
-        $company = Company::find($req->company_id);
+        $company = Company::find($req->get('company_id'));
         if (!$company) {
             return response()->json([
                 'status' => config('app.error_status'),

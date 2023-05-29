@@ -29,7 +29,7 @@ class LikesController extends Controller {
         }
 
         // Получаем по id
-        $entity = (ucfirst($req->get('type')))::whereId($req->item_id)->first();
+        $entity = (ucfirst($req->get('type')))::whereId($req->get('item_id'))->first();
 
         // Проверяем есть ли пост
         if (!$entity) {
@@ -48,7 +48,6 @@ class LikesController extends Controller {
 
         // Если есть, то удаляем
         if (!$like->wasRecentlyCreated()) {
-
             $like->delete();
 
             return response()->json([
@@ -68,15 +67,9 @@ class LikesController extends Controller {
     /**
      * Получить все лайканные элементы пользователя
      */
-    public
-    function getAll(
-        Request $req
-    ) {
-        // Получаем пользователя
-        $user = auth()->user();
-
+    public function getAll(Request $req) {
         // Получение всех избранных элементов пользователя
-        $likes = Like::where('user_id', $user->id)->get();
+        $likes = Like::where('user_id', $req->user()->id)->get();
 
         // Добавляем для каждого элемента дополнительное поле - тип элемента
         foreach ($likes as $like) {

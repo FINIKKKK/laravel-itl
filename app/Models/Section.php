@@ -10,23 +10,28 @@ class Section extends Model {
 
     protected $guarded = false;
 
+    // Автор раздела
+    public function author() {
+        return $this->belongsTo(User::class);
+    }
+
+    // Компания, в которой находиться этот раздел
     public function company() {
         return $this->belongsTo(Company::class);
     }
 
-    public function user() {
-        return $this->belongsTo(User::class);
-    }
-
+    // Посты внутри этого раздела
     public function posts() {
         return $this->hasMany(Post::class);
     }
 
+    // Дочерние разделы внутри этого раздлела
     public function sections() {
         return $this->hasMany(Section::class);
     }
 
-    public function parent() {
+    // Родительский раздел, к которому принадлежит этот раздел
+    public function parentSection() {
         return $this->belongsTo(Section::class);
     }
 

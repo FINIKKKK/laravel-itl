@@ -12,10 +12,12 @@ class Company extends Model
 
     protected $guarded = false;
 
+    // Создатель компании
     public function owner() {
         return $this->belongsTo(User::class);
     }
 
+    // Пользователи в компании
     public function users() {
         return $this->belongsToMany(User::class, 'user_company', 'company_id', 'user_id')->withPivot('role_id');
     }
