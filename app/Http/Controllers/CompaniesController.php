@@ -17,7 +17,7 @@ class CompaniesController extends Controller {
         // Проверяем данные запроса
         $validator = Validator::make($req->all(), [
             'name' => 'required|string|min:2|max:150|unique:companies,name',
-            'url_address' => 'required|url|unique:companies,url_address',
+            'url_address' => 'required|string|unique:companies,url_address',
         ]);
         // Прокидываем ошибки, если данные не прошли валидацию
         if ($validator->fails()) {
@@ -26,7 +26,6 @@ class CompaniesController extends Controller {
                 'message' => $validator->errors()->all()
             ], config('app.error_status'));
         }
-
 
         // Получаем текущего пользователя
         $user = $req->user();
@@ -41,6 +40,9 @@ class CompaniesController extends Controller {
             'url_address' => $req->get('url_address'),
             'user_id' => $user->id,
         ]);
+
+        // Добавляем поле - количество пользователей
+        $company->users_count = 1;
 
         // Получаем роль (модератор)
         $role = Role::findOrFail(1);

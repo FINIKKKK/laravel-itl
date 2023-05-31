@@ -89,8 +89,8 @@ class CommentsController extends Controller {
             if ($user) {
                 // Проверяем, есть ли лайк на посте
                 $like = Like::where('user_id', $user->id)
-                    ->where('liketable_id', $comment->id)
-                    ->where('liketable_type', Comment::class)
+                    ->where('likeable_id', $comment->id)
+                    ->where('likeable_type', Comment::class)
                     ->first();
                 // Если есть, то помечаем поле, как отмеченное
                 if ($like) {

@@ -15,7 +15,12 @@ class Post extends Model {
 
     // Автор поста
     public function author() {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    // Компания, в которой был создан этот пост
+    public function company() {
+        return $this->belongsTo(Company::class, 'company_id');
     }
 
     // Раздел у поста
@@ -33,6 +38,6 @@ class Post extends Model {
     }
 
     public function likes() {
-        return $this->morphToMany(User::class, 'liketable', 'likes');
+        return $this->morphToMany(User::class, 'likeable', 'likes');
     }
 }

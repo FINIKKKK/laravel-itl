@@ -48,8 +48,7 @@ class FavoritesController extends Controller {
                 'status' => config('app.success_status'),
                 'message' => ['Элемент удален из избранного'],
             ], config('app.success_status'));
-        }
-        // Если нет, то добавляем
+        } // Если нет, то добавляем
         else {
             $favorite = Favorite::create([
                 'user_id' => $req->user()->id,
@@ -70,19 +69,46 @@ class FavoritesController extends Controller {
      */
     public function getAll(Request $req) {
         // Получение всех избранных элементов пользователя
-        $favorites = Favorite::where('user_id', $req->user()->id)->with('favoritable')->get();
+        $favorites = Favorite::where('user_id', $req->user()->id)
+            ->with('favoritable')
+            ->with('favoritable.company:id,name,slug')
+            ->get();
+
 
         // Добавляем для каждого элемента дополнительное поле - тип элемента
-        foreach ($favorites as $favorite) {
+        $favorites->each(function ($favorite) {
             $str = explode('\\', $favorite->favoritable_type);
             $type = strtolower(end($str));
             $favorite->type = $type;
-        }
+        });
+
+        $groupedFavorites = $favorites->groupBy(function ($favorite) {
+            return $favorite->favoritable->company->name;
+        });
+
+        $sortedFavorites = $groupedFavorites->sortByDesc(function ($favorites) {
+            return $favorites->max('created_at');
+        });
+
+        $result = $sortedFavorites->map(function ($favorites, $companyName) {
+            $sortedFavorites = $favorites->sortByDesc(function ($favorite) {
+                return $favorite->created_at;
+            });
+
+            return [
+                'id' => $favorites->first()->favoritable->company->id,
+                'name' => $companyName,
+                'slug' => $favorites->first()->favoritable->company->slug,
+                'favorites' => $sortedFavorites->values()->map(function ($favorite) {
+                    return $favorite;
+                }),
+            ];
+        });
 
         // Возвращаем список элементов
         return response()->json([
             'status' => config('app.success_status'),
-            'data' => $favorites,
+            'data' => $result,
         ], config('app.success_status'));
     }
 }

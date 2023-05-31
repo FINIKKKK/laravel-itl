@@ -42,8 +42,8 @@ class LikesController extends Controller {
         // Проверяем, существует ли уже элемент в избранном пользователя
         $like = Like::firstOrCreate([
             'user_id' => $req->user()->id,
-            'liketable_id' => $entity->id,
-            'liketable_type' => $entity::class
+            'likeable_id' => $entity->id,
+            'likeable_type' => $entity::class
         ]);
 
         // Если есть, то удаляем
@@ -73,7 +73,7 @@ class LikesController extends Controller {
 
         // Добавляем для каждого элемента дополнительное поле - тип элемента
         foreach ($likes as $like) {
-            $str = explode('\\', $like->liketable_type);
+            $str = explode('\\', $like->likeable_type);
             $type = strtolower(end($str));
             $like->type = $type;
         }

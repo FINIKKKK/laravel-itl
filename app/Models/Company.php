@@ -6,8 +6,7 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Company extends Model
-{
+class Company extends Model {
     use HasFactory;
 
     protected $guarded = false;
@@ -16,6 +15,17 @@ class Company extends Model
     public function owner() {
         return $this->belongsTo(User::class);
     }
+
+    // Создатель компании
+    public function sections() {
+        return $this->belongsToMany(Section::class, 'sections', 'section_id');
+    }
+
+    // Создатель компании
+    public function posts() {
+        return $this->hasMany(Post::class);
+    }
+
 
     // Пользователи в компании
     public function users() {

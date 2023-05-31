@@ -105,12 +105,12 @@ class AuthController extends BaseController {
             'status' => config('app.success_status'),
             'data' => [
                 'user' => $user,
-                'companies' => $companies,
                 'token' => [
                     'access_token' => $token,
                     'token_type' => 'bearer',
                     'expires_in' => auth()->factory()->getTTL() * 60,
                 ],
+                'companies' => $companies,
             ]
         ]);
     }

@@ -11,10 +11,12 @@ class Favorite extends Model {
 
     protected $guarded = false;
 
+    // Пользователь, у которого есть эти избранные элементы
     public function user() {
         return $this->belongsTo(User::class);
     }
 
+    // Избранное
     public function favoritable() {
         return $this->morphTo();
     }

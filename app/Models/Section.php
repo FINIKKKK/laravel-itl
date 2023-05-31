@@ -12,7 +12,7 @@ class Section extends Model {
 
     // Автор раздела
     public function author() {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     // Компания, в которой находиться этот раздел
@@ -32,7 +32,7 @@ class Section extends Model {
 
     // Родительский раздел, к которому принадлежит этот раздел
     public function parentSection() {
-        return $this->belongsTo(Section::class);
+        return $this->belongsTo(Section::class, 'parent_id');
     }
 
     public function favorites() {

@@ -74,7 +74,7 @@ class SectionsController extends Controller {
         // + Без поля body
         // + Сортируем по дате (сначала новые)
         $sections = Section::whereNull('parent_id')
-            ->where('company_id', $req->company_id)
+            ->where('company_id', $req->get('company_id'))
             ->without('body')
             ->orderBy('created_at', 'desc')
             ->get();
@@ -91,7 +91,7 @@ class SectionsController extends Controller {
      */
     public function getOne($id) {
         // Проверяем есть ли такой раздел
-        $section = Section::with('user')->with(['parent:id,title'])->find($id);
+        $section = Section::with('author:id,firstName,lastName')->with(['parentSection:id,title'])->find($id);
         if (!$section->count()) {
             return response()->json([
                 'status' => config('app.error_status'),

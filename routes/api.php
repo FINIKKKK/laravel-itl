@@ -160,6 +160,16 @@ Route::controller(PostsController::class)
             Route::name('create')->post('/', 'create');
 
             /**
+             * Получение постов пользователя
+             */
+            Route::name('getMy')->get('/get/my', 'getMy');
+
+            /**
+             * Получение постов пользователя
+             */
+            Route::name('getModeration')->get('/get/moderation', 'getModeration');
+
+            /**
              * Обновление поста по id
              */
             Route::name('update')->patch('/{id}', 'update');
