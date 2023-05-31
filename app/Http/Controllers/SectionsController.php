@@ -16,10 +16,7 @@ class SectionsController extends BaseController {
         // Проверяем есть ли компанию
         $company = Company::find($req->get('company_id'));
         if (!$company) {
-            return response()->json([
-                'status' => config('app.error_status'),
-                'message' => ['Компания не найдена'],
-            ], config('app.error_status'));
+            return $this->response('Компания не найдена', true, true);
         }
 
         // Проверяем данные запроса
@@ -31,7 +28,7 @@ class SectionsController extends BaseController {
         ]);
         // Прокидываем ошибки, если данные не прошли валидацию
         if ($validator->fails()) {
-            return $this->validationErrorResponse($validator);
+            return $this->validationErrors($validator);
         }
 
         // Создаем раздел (касты)
@@ -44,10 +41,7 @@ class SectionsController extends BaseController {
         ]);
 
         // Возвращаем раздел
-        return response()->json([
-            'status' => config('app.success_status'),
-            'data' => $section,
-        ], config('app.success_status'));
+        return $this->response($section, false, false);
     }
 
     /**
@@ -60,7 +54,7 @@ class SectionsController extends BaseController {
         ]);
         // Прокидываем ошибки, если данные не прошли валидацию
         if ($validator->fails()) {
-            return $this->validationErrorResponse($validator);
+            return $this->validationErrors($validator);
         }
 
         // Получаем список разделов только родительские
@@ -74,10 +68,7 @@ class SectionsController extends BaseController {
             ->get();
 
         // Возвращаем список разделов
-        return response()->json([
-            'status' => config('app.success_status'),
-            'data' => $sections,
-        ], config('app.success_status'));
+        return $this->response($sections, false, false);
     }
 
     /**
@@ -87,10 +78,7 @@ class SectionsController extends BaseController {
         // Проверяем есть ли такой раздел
         $section = Section::with('author:id,firstName,lastName')->with(['parentSection:id,title'])->find($id);
         if (!$section->count()) {
-            return response()->json([
-                'status' => config('app.error_status'),
-                'message' => ['Раздел не найден'],
-            ], config('app.error_status'));
+            return $this->response('Раздел не найден', true, true);
         }
 
         // Конвертируем body у раздела из строки в массив
@@ -107,10 +95,7 @@ class SectionsController extends BaseController {
         ];
 
         // Возвращаем раздел
-        return response()->json([
-            'status' => config('app.success_status'),
-            'data' => $section,
-        ], config('app.success_status'));
+        return $this->response($section, false, false);
     }
 
     /**
@@ -120,10 +105,7 @@ class SectionsController extends BaseController {
         // Проверяем есть ли раздел
         $section = Section::find($id);
         if (!$section) {
-            return response()->json([
-                'status' => config('app.error_status'),
-                'message' => ['Раздел не найден'],
-            ], config('app.error_status'));
+            return $this->response('Раздел не найден', true, true);
         }
 
         // Проверяем данные запроса
@@ -133,17 +115,14 @@ class SectionsController extends BaseController {
         ]);
         // Прокидываем ошибки, если данные не прошли валидацию
         if ($validator->fails()) {
-            return $this->validationErrorResponse($validator);
+            return $this->validationErrors($validator);
         }
 
         // Обновляем раздел
         $section->update($req->all());
 
         // Возвращаем обновленный раздел
-        return response()->json([
-            'status' => config('app.success_status'),
-            'data' => $section,
-        ], config('app.success_status'));
+        return $this->response($section, false, false);
     }
 
     /**
@@ -153,19 +132,13 @@ class SectionsController extends BaseController {
         // Проверяем есть ли раздел
         $section = Section::find($id);
         if (!$section) {
-            return response()->json([
-                'status' => config('app.error_status'),
-                'message' => ['Раздел не найден'],
-            ], config('app.error_status'));
+            return $this->response('Раздел не найден', true, true);
         }
 
         // Удаляем раздел
         $section->delete();
 
         // Возвращаем сообщение об успешном удалении
-        return response()->json([
-            'status' => config('app.success_status'),
-            'message' => ['Раздел успешно удален'],
-        ], config('app.success_status'));
+        return $this->response('Раздел успешно удален', false, true);
     }
 }

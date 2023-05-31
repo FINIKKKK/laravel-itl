@@ -9,30 +9,42 @@ class BaseController extends Controller {
     /**
      * Вывод данных
      */
-    protected function errorResponse($message): JsonResponse {
-        return response()->json([
-            'status' => config('app.error_status'),
-            'message' => [$message],
-        ], config('app.error_status'));
-    }
+    protected function response($data, $isError, $isMessage) {
+        // Определяем статус ответа
+        if ($isError) {
+            $status = config('app.errors.status.error');
+        } else {
+            $status = config('app.errors.status.success');
+        }
 
-    /**
-     * Вывод сообщения
-     */
-    protected function successResponse($data): JsonResponse {
-        return response()->json([
-            'status' => config('app.success_status'),
-            'data' => $data,
-        ], config('app.success_status'));
+        // Если это сообщение
+        if ($isMessage) {
+            $responseData = [
+                'status' => $status,
+                'message' => [$data],
+            ];
+        } // Если это данные
+        else {
+            $responseData = [
+                'status' => $status,
+                'data' => $data,
+            ];
+        }
+
+        // Возвращаем ответ
+        return response()->json(
+            $responseData,
+            $status
+        );
     }
 
     /**
      * Вывод ошибок валидации
      */
-    protected function validationErrorResponse(Validator $validator): JsonResponse {
+    protected function validationErrors(Validator $validator) {
         return response()->json([
-            'status' => config('app.error_status'),
+            'status' => config('app.errors.status.error'),
             'message' => $validator->errors()->all(),
-        ], config('app.error_status'));
+        ], config('app.errors.status.error'));
     }
 }

@@ -9,21 +9,6 @@ use Illuminate\Support\Facades\Validator;
 
 class AuthController extends BaseController {
 
-    // Возворащение пользователя и его токена
-    protected function respondUserWithToken($user, $token) {
-        return response()->json([
-            'status' => config('app.success_status'),
-            'data' => [
-                'user' => $user,
-                'token' => [
-                    'access_token' => $token,
-                    'token_type' => 'bearer',
-                    'expires_in' => auth()->factory()->getTTL() * 60,
-                ],
-            ]
-        ]);
-    }
-
     /**
      * Регистрация пользователя
      */
@@ -37,7 +22,7 @@ class AuthController extends BaseController {
         ]);
         // Прокидываем ошибки, если данные не прошли валидацию
         if ($validator->fails()) {
-            return $this->validationErrorResponse($validator);
+            return $this->validationErrors($validator);
         }
 
         // Создаем пользователя
@@ -52,7 +37,17 @@ class AuthController extends BaseController {
         $token = auth()->login($user);
 
         // Возвращаем данные пользователя и его токен
-        return $this->respondUserWithToken($user, $token);
+        return response()->json([
+            'status' => config('app.errors.status.success'),
+            'data' => [
+                'user' => $user,
+                'token' => [
+                    'access_token' => $token,
+                    'token_type' => 'bearer',
+                    'expires_in' => auth()->factory()->getTTL() * 60,
+                ],
+            ]
+        ]);
     }
 
     /**
@@ -66,7 +61,7 @@ class AuthController extends BaseController {
         ]);
         // Прокидываем ошибки, если данные не прошли валидацию
         if ($validator->fails()) {
-            return $this->validationErrorResponse($validator);
+            return $this->validationErrors($validator);
         }
 
         // Выбираем только поля email и password из запроса
@@ -75,7 +70,7 @@ class AuthController extends BaseController {
         $token = auth()->setTTL(config('app.token_lifetime'))->attempt($loginValue);
         // Если не прошел, то прокидываем ошибку
         if (!$token) {
-            return $this->errorResponse('Неверный email или пароль');
+            return $this->response('Неверный email или пароль', true, true);
         }
 
         // Получаем компании пользователя
@@ -91,7 +86,7 @@ class AuthController extends BaseController {
 
         // Возвращаем данные пользователя и его токен
         return response()->json([
-            'status' => config('app.success_status'),
+            'status' => config('app.errors.status.success'),
             'data' => [
                 'user' => $user,
                 'token' => [
@@ -120,15 +115,11 @@ class AuthController extends BaseController {
         });
 
         // Возвращение информации о текущем пользователе и его компаний
-        return response()->json([
-            'status' => config('app.success_status'),
-            'data' => [
-                'user' => $user,
-                'companies' => $companies,
-            ],
-        ], config('app.success_status'));
+        return $this->response([
+            'user' => $user,
+            'companies' => $companies,
+        ], false, false);
     }
-
 
     /**
      * Выход из аккаунта
@@ -138,9 +129,6 @@ class AuthController extends BaseController {
         auth()->logout();
 
         // Возвращаем сообщение об успешном выходе
-        return response()->json([
-            'status' => config('app.success_status'),
-            'message' => ['Успешный выход из аккаунта'],
-        ], config('app.success_status'));
+        return $this->response('Успешный выход из аккаунта', false, true);
     }
 }

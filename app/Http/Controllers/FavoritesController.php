@@ -19,17 +19,14 @@ class FavoritesController extends BaseController {
         ]);
         // Прокидываем ошибки, если данные не прошли валидацию
         if ($validator->fails()) {
-            return $this->validationErrorResponse($validator);
+            return $this->validationErrors($validator);
         }
 
         // Получаем пост по id
         $post = Post::find($req->get('item_id'));
         // Проверяем есть ли пост
         if (!$post) {
-            return response()->json([
-                'status' => config('app.error_status'),
-                'message' => ['Пост не найден'],
-            ], config('app.error_status'));
+            return $this->response('Пост не найден', true, true);
         }
 
         // Проверяем, существует ли уже элемент в избранном пользователя
@@ -41,10 +38,7 @@ class FavoritesController extends BaseController {
         // Если есть, то удаляем
         if ($favorite) {
             $favorite->delete();
-            return response()->json([
-                'status' => config('app.success_status'),
-                'message' => ['Элемент удален из избранного'],
-            ], config('app.success_status'));
+            return $this->response('Элемент удален из избранного', false, true);
         } // Если нет, то добавляем
         else {
             $favorite = Favorite::create([
@@ -55,10 +49,7 @@ class FavoritesController extends BaseController {
         }
 
         // Возвращаем список элементов
-        return response()->json([
-            'status' => config('app.success_status'),
-            'message' => ['Элемент добавлен в избранное'],
-        ], config('app.success_status'));
+        return $this->response('Элемент добавлен в избранное', false, true);
     }
 
     /**
@@ -70,7 +61,6 @@ class FavoritesController extends BaseController {
             ->with('favoritable')
             ->with('favoritable.company:id,name,slug')
             ->get();
-
 
         // Добавляем для каждого элемента дополнительное поле - тип элемента
         $favorites->each(function ($favorite) {
@@ -103,9 +93,6 @@ class FavoritesController extends BaseController {
         });
 
         // Возвращаем список элементов
-        return response()->json([
-            'status' => config('app.success_status'),
-            'data' => $result,
-        ], config('app.success_status'));
+        return $this->response($result, false, false);
     }
 }

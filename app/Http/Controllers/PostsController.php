@@ -26,16 +26,13 @@ class PostsController extends BaseController {
         ]);
         // Прокидываем ошибки, если данные не прошли валидацию
         if ($validator->fails()) {
-            return $this->validationErrorResponse($validator);
+            return $this->validationErrors($validator);
         }
 
         // Проверяем есть ли компания
         $company = Section::find($req->get('company_id'));
         if (!$company) {
-            return response()->json([
-                'status' => config('app.error_status'),
-                'message' => ['Компания не найдена'],
-            ], config('app.error_status'));
+            return $this->response('Компания не найдена', true, true);
         }
 
         // Находим компанию пользователя
@@ -45,10 +42,7 @@ class PostsController extends BaseController {
         // Проверяем есть ли раздел
         $section = Section::find($req->get('section_id'));
         if (!$section) {
-            return response()->json([
-                'status' => config('app.error_status'),
-                'message' => ['Раздел не найден'],
-            ], config('app.error_status'));
+            return $this->response('Раздел не найден', true, true);
         }
 
         // Создаем пост
@@ -66,10 +60,7 @@ class PostsController extends BaseController {
         }
 
         // Возвращаем пост
-        return response()->json([
-            'status' => config('app.success_status'),
-            'data' => $post,
-        ], config('app.success_status'));
+        return $this->response($post, false, false);
     }
 
     /**
@@ -82,7 +73,7 @@ class PostsController extends BaseController {
         ]);
         // Прокидываем ошибки, если данные не прошли валидацию
         if ($validator->fails()) {
-            return $this->validationErrorResponse($validator);
+            return $this->validationErrors($validator);
         }
 
         // Получаем список постов
@@ -94,10 +85,7 @@ class PostsController extends BaseController {
             ->get();
 
         // Возвращаем список постов
-        return response()->json([
-            'status' => config('app.success_status'),
-            'data' => $posts,
-        ], config('app.success_status'));
+        return $this->response($posts, false, false);
     }
 
     /**
@@ -110,17 +98,14 @@ class PostsController extends BaseController {
         ]);
         // Прокидываем ошибки, если данные не прошли валидацию
         if ($validator->fails()) {
-            return $this->validationErrorResponse($validator);
+            return $this->validationErrors($validator);
         }
 
         // Получаем пользователя
         $posts = $req->user()->posts()->where('company_id', $req->get('company_id'))->get();
 
         // Возвращаем обновленный пост
-        return response()->json([
-            'status' => config('app.success_status'),
-            'data' => $posts
-        ], config('app.success_status'));
+        return $this->response($posts, false, false);
     }
 
     /**
@@ -133,9 +118,8 @@ class PostsController extends BaseController {
         ]);
         // Прокидываем ошибки, если данные не прошли валидацию
         if ($validator->fails()) {
-            return $this->validationErrorResponse($validator);
+            return $this->validationErrors($validator);
         }
-
 
         // Получаем пользователя
         $company = Company::find($req->get('company_id'));
@@ -143,10 +127,7 @@ class PostsController extends BaseController {
         $posts = $company->posts()->where('onModeration', true)->get();
 
         // Возвращаем обновленный пост
-        return response()->json([
-            'status' => config('app.success_status'),
-            'data' => $posts
-        ], config('app.success_status'));
+        return $this->response($posts, false, false);
     }
 
 
@@ -169,10 +150,7 @@ class PostsController extends BaseController {
         ])->find($id);
         // Проверяем есть ли такой пост
         if (!$post) {
-            return response()->json([
-                'status' => config('app.error_status'),
-                'message' => ['Пост не найден'],
-            ], config('app.error_status'));
+            return $this->response('Пост не найден', true, true);
         }
 
         // Конвертируем body у поста из строки в массив
@@ -212,10 +190,7 @@ class PostsController extends BaseController {
         $post->isLike = false;
 
         // Возвращаем пост
-        return response()->json([
-            'status' => config('app.success_status'),
-            'data' => $post,
-        ], config('app.success_status'));
+        return $this->response($post, false, false);
     }
 
     /**
@@ -225,10 +200,7 @@ class PostsController extends BaseController {
         // Проверяем есть ли пост
         $post = Post::find($id);
         if (!$post) {
-            return response()->json([
-                'status' => config('app.error_status'),
-                'message' => ['Пост не найден'],
-            ], config('app.error_status'));
+            return $this->response('Пост не найден', true, true);
         }
 
         // Проверяем данные запроса
@@ -238,17 +210,14 @@ class PostsController extends BaseController {
         ]);
         // Прокидываем ошибки, если данные не прошли валидацию
         if ($validator->fails()) {
-            return $this->validationErrorResponse($validator);
+            return $this->validationErrors($validator);
         }
 
         // Обновляем пост
         $post->update($req->all());
 
         // Возвращаем обновленный пост
-        return response()->json([
-            'status' => config('app.success_status'),
-            'data' => $post,
-        ], config('app.success_status'));
+        return $this->response($post, false, false);
     }
 
     /**
@@ -258,19 +227,13 @@ class PostsController extends BaseController {
         // Проверяем есть ли пост
         $post = Post::find($id);
         if (!$post) {
-            return response()->json([
-                'status' => config('app.error_status'),
-                'message' => ['Пост не найден'],
-            ], config('app.error_status'));
+            return $this->response('Пост не найден', true, true);
         }
 
         // Удаляем пост
         $post->delete();
 
         // Возвращаем сообщение об успешном удалении
-        return response()->json([
-            'status' => config('app.success_status'),
-            'message' => ['Пост успешно удален'],
-        ], config('app.success_status'));
+        return $this->response('Пост успешно удален', false, true);
     }
 }

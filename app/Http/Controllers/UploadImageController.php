@@ -17,7 +17,7 @@ class UploadImageController extends BaseController {
         ]);
         // Прокидываем ошибки, если данные не прошли валидацию
         if ($validator->fails()) {
-            return $this->validationErrorResponse($validator);
+            return $this->validationErrors($validator);
         }
 
         // Загружаем изображение
@@ -51,14 +51,11 @@ class UploadImageController extends BaseController {
                 // Возвращаем полный путь изображения
                 return "http://{$path}:8000/{$imgPath}/{$imageName}";
             } else {
-                return ["Изображение должно быть не менее 256x256 пикселей"];
+                return $this->response("Изображение должно быть не менее 256x256 пикселей", true, true);
             }
         } else {
             // Прокидываем ошибку, если изображение не было загружено
-            return response()->json([
-                'status' => config('app.error_status'),
-                'message' => ['Ошибка загрузки изображения'],
-            ], config('app.error_status'));
+            return $this->response('Ошибка загрузки изображения', true, true);
         }
     }
 }

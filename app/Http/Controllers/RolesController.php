@@ -10,7 +10,10 @@ class RolesController extends BaseController {
      * Получение всех ролей
      */
     public function getAll(Request $req) {
-        $users = Role::all();
-        return $users;
+        // Получаем все роли
+        $roles = Role::all();
+
+        // Возвращаем список ролей
+        return $this->response($roles, false, false);
     }
 }

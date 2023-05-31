@@ -22,7 +22,7 @@ class LikesController extends BaseController {
 
         // Прокидываем ошибки, если данные не прошли валидацию
         if ($validator->fails()) {
-            return $this->validationErrorResponse($validator);
+            return $this->validationErrors($validator);
         }
 
         // Получаем по id
@@ -30,10 +30,7 @@ class LikesController extends BaseController {
 
         // Проверяем есть ли пост
         if (!$entity) {
-            return response()->json([
-                'status' => config('app.error_status'),
-                'message' => ['Элемент не найден'],
-            ], config('app.error_status'));
+            return $this->response('Элемент не найден', true, true);
         }
 
         // Проверяем, существует ли уже элемент в избранном пользователя
@@ -47,18 +44,11 @@ class LikesController extends BaseController {
         if (!$like->wasRecentlyCreated()) {
             $like->delete();
 
-            return response()->json([
-                'status' => config('app.success_status'),
-                'message' => ['Элемент удален из понравившееся'],
-            ], config('app.success_status'));
+            return $this->response('Элемент удален из понравившееся', false, true);
         }
 
         // Возвращаем список элементов
-        //
-        return response()->json([
-            'status' => config('app.success_status'),
-            'message' => ['Элемент добавлен в понравившееся'],
-        ], config('app.success_status'));
+        return $this->response('Элемент добавлен в понравившееся', false, true);
     }
 
     /**
@@ -76,9 +66,6 @@ class LikesController extends BaseController {
         }
 
         // Возвращаем список элементов
-        return response()->json([
-            'status' => config('app.success_status'),
-            'data' => $likes,
-        ], config('app.success_status'));
+        return $this->response($likes, false, false);
     }
 }

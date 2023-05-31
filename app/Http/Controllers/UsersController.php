@@ -10,14 +10,6 @@ use Illuminate\Support\Facades\Validator;
 class UsersController extends BaseController {
 
     /**
-     * Получение всех пользователей
-     */
-    public function getAll() {
-        $users = User::all();
-        return $users;
-    }
-
-    /**
      * Обновление данных пользователя
      */
     public function updateUserData(Request $req) {
@@ -30,7 +22,7 @@ class UsersController extends BaseController {
         ]);
         // Прокидываем ошибки, если данные не прошли валидацию
         if ($validator->fails()) {
-            return $this->validationErrorResponse($validator);
+            return $this->validationErrors($validator);
         }
 
         // Получаем пользователя
@@ -47,10 +39,7 @@ class UsersController extends BaseController {
         $user->save();
 
         // Возвращаем обновленный пост
-        return response()->json([
-            'status' => config('app.success_status'),
-            'data' => $user,
-        ], config('app.success_status'));
+        return $this->response($user, false, false);
     }
 
     /**
@@ -63,7 +52,7 @@ class UsersController extends BaseController {
         ]);
         // Прокидываем ошибки, если данные не прошли валидацию
         if ($validator->fails()) {
-            return $this->validationErrorResponse($validator);
+            return $this->validationErrors($validator);
         }
 
         // Получаем пользователя
@@ -85,10 +74,7 @@ class UsersController extends BaseController {
         ]);
 
         // Возвращаем обновленный пост
-        return response()->json([
-            'status' => config('app.success_status'),
-            'data' => $avatarUrl,
-        ], config('app.success_status'));
+        return $this->response($avatarUrl, false, false);
     }
 
     /**
@@ -102,7 +88,7 @@ class UsersController extends BaseController {
         ]);
         // Прокидываем ошибки, если данные не прошли валидацию
         if ($validator->fails()) {
-            return $this->validationErrorResponse($validator);
+            return $this->validationErrors($validator);
         }
 
         // Получаем пользователя
@@ -110,10 +96,7 @@ class UsersController extends BaseController {
 
         // Проверяем совпадают ли пароли
         if (!Hash::check($req->get('old_password'), $user->password)) {
-            return response()->json([
-                'status' => config('app.error_status'),
-                'message' => ['Неверный пароль'],
-            ], config('app.error_status'));
+            return $this->response('Неверный пароль', true, true);
         }
 
         // Обновляем пароль
@@ -122,9 +105,6 @@ class UsersController extends BaseController {
         ]);
 
         // Возвращаем обновленный пост
-        return response()->json([
-            'status' => config('app.success_status'),
-            'data' => $user,
-        ], config('app.success_status'));
+        return $this->response($user, false, false);
     }
 }

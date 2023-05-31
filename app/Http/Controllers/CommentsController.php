@@ -22,16 +22,13 @@ class CommentsController extends BaseController {
         ]);
         // Прокидываем ошибки, если данные не прошли валидацию
         if ($validator->fails()) {
-            return $this->validationErrorResponse($validator);
+            return $this->validationErrors($validator);
         }
 
         // Проверяем есть ли пост
         $post = Post::find($req->get('post_id'));
         if (!$post) {
-            return response()->json([
-                'status' => config('app.error_status'),
-                'message' => ['Пост не найден'],
-            ], config('app.error_status'));
+            return $this->response('Пост не найден', true, true);
         }
 
         // Создаем комментарий и подгружаем информацию об авторе комментария
@@ -43,10 +40,7 @@ class CommentsController extends BaseController {
         ])->load('user');
 
         // Возвращаем комментарий
-        return response()->json([
-            'status' => config('app.success_status'),
-            'data' => $comment,
-        ], config('app.success_status'));
+        return $this->response($comment, false, false);
     }
 
     /**
@@ -59,7 +53,7 @@ class CommentsController extends BaseController {
         ]);
         // Прокидываем ошибки, если данные не прошли валидацию
         if ($validator->fails()) {
-            return $this->validationErrorResponse($validator);
+            return $this->validationErrors($validator);
         }
 
         // Получаем только те комментарии, которые являются родителями
@@ -100,10 +94,7 @@ class CommentsController extends BaseController {
         }
 
         // Возвращаем комментарии
-        return response()->json([
-            'status' => config('app.success_status'),
-            'data' => $comments,
-        ], config('app.success_status'));
+        return $this->response($comments, false, false);
     }
 
     /**
@@ -113,10 +104,7 @@ class CommentsController extends BaseController {
         // Проверяем есть ли комментарий
         $comment = Comment::find($id);
         if (!$comment) {
-            return response()->json([
-                'status' => config('app.error_status'),
-                'message' => ['Комментарий не найден'],
-            ], config('app.error_status'));
+            return $this->response('Комментарий не найден', true, true);
         }
 
         // Проверяем данные запроса
@@ -125,17 +113,14 @@ class CommentsController extends BaseController {
         ]);
         // Прокидываем ошибки, если данные не прошли валидацию
         if ($validator->fails()) {
-            return $this->validationErrorResponse($validator);
+            return $this->validationErrors($validator);
         }
 
         // Обновляем комментарий
         $comment->update($req->all());
 
         // Возвращаем обновленный комментарий
-        return response()->json([
-            'status' => config('app.success_status'),
-            'data' => $comment,
-        ], config('app.success_status'));
+        return $this->response($comment, false, false);
     }
 
     /**
@@ -145,19 +130,13 @@ class CommentsController extends BaseController {
         // Проверяем есть ли комментарий
         $comment = Comment::find($id);
         if (!$comment) {
-            return response()->json([
-                'status' => config('app.error_status'),
-                'message' => ['Комментарий не найден'],
-            ], config('app.error_status'));
+            return $this->response('Комментарий не найден', true, true);
         }
 
         // Удаляем комментарий
         $comment->delete();
 
         // Возвращаем сообщение об успешном удалении комментария
-        return response()->json([
-            'status' => config('app.success_status'),
-            'message' => ['Комментарий успешно удален'],
-        ], config('app.success_status'));
+        return $this->response('Комментарий успешно удален', false, true);
     }
 }
