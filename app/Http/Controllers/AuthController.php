@@ -2,10 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Company;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
@@ -39,10 +37,7 @@ class AuthController extends BaseController {
         ]);
         // Прокидываем ошибки, если данные не прошли валидацию
         if ($validator->fails()) {
-            return response()->json([
-                'status' => config('app.error_status'),
-                'message' => $validator->errors()->all()
-            ], config('app.error_status'));
+            return $this->validationErrorResponse($validator);
         }
 
         // Создаем пользователя
@@ -71,10 +66,7 @@ class AuthController extends BaseController {
         ]);
         // Прокидываем ошибки, если данные не прошли валидацию
         if ($validator->fails()) {
-            return response()->json([
-                'status' => config('app.error_status'),
-                'message' => $validator->errors()->all()
-            ], config('app.error_status'));
+            return $this->validationErrorResponse($validator);
         }
 
         // Выбираем только поля email и password из запроса
@@ -83,10 +75,7 @@ class AuthController extends BaseController {
         $token = auth()->setTTL(config('app.token_lifetime'))->attempt($loginValue);
         // Если не прошел, то прокидываем ошибку
         if (!$token) {
-            return response()->json([
-                'status' => config('app.error_status'),
-                'message' => ['Неверный email или пароль'],
-            ], config('app.error_status'));
+            return $this->errorResponse('Неверный email или пароль');
         }
 
         // Получаем компании пользователя

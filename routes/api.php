@@ -1,15 +1,5 @@
 <?php
 
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\CommentsController;
-use App\Http\Controllers\CompaniesController;
-use App\Http\Controllers\FavoritesController;
-use App\Http\Controllers\LikesController;
-use App\Http\Controllers\PostsController;
-use App\Http\Controllers\SectionsController;
-use App\Http\Controllers\UploadFileController;
-use App\Http\Controllers\UsersController;
-use App\Models\Favorite;
 use Illuminate\Support\Facades\Route;
 
 
@@ -18,7 +8,7 @@ use Illuminate\Support\Facades\Route;
 | Авторизация и регистрация
 |---------------------------------------------------------------
 */
-Route::controller(AuthController::class)
+Route::controller(\App\Http\Controllers\AuthController::class)
     ->prefix('auth')
     ->name('auth.')
     ->group(callback: function () {
@@ -52,15 +42,10 @@ Route::controller(AuthController::class)
 | Пользователи
 |---------------------------------------------------------------
 */
-Route::controller(UsersController::class)
+Route::controller(\App\Http\Controllers\UsersController::class)
     ->prefix('users')
     ->name('users.')
     ->group(callback: function () {
-        /**
-         * Получение всех пользователей
-         */
-        Route::name('getAll')->get('/', 'getAll');
-
         // Группа маршрутов, требующих аутентификации
         Route::middleware('auth')->group(function () {
             /**
@@ -86,7 +71,7 @@ Route::controller(UsersController::class)
 | Компании
 |---------------------------------------------------------------
 */
-Route::controller(CompaniesController::class)
+Route::controller(\App\Http\Controllers\CompaniesController::class)
     ->prefix('companies')
     ->name('companies.')
     ->group(callback: function () {
@@ -138,7 +123,7 @@ Route::controller(CompaniesController::class)
 | Посты
 |---------------------------------------------------------------
 */
-Route::controller(PostsController::class)
+Route::controller(\App\Http\Controllers\PostsController::class)
     ->prefix('posts')
     ->name('posts.')
     ->group(callback: function () {
@@ -165,7 +150,7 @@ Route::controller(PostsController::class)
             Route::name('getMy')->get('/get/my', 'getMy');
 
             /**
-             * Получение постов пользователя
+             * Получение постов, которые находяться на модерации
              */
             Route::name('getModeration')->get('/get/moderation', 'getModeration');
 
@@ -187,7 +172,7 @@ Route::controller(PostsController::class)
 | Комментарии
 |---------------------------------------------------------------
 */
-Route::controller(CommentsController::class)
+Route::controller(\App\Http\Controllers\CommentsController::class)
     ->prefix('comments')
     ->name('comments.')
     ->group(callback: function () {
@@ -216,8 +201,12 @@ Route::controller(CommentsController::class)
     });
 
 
-// Загрузка файлов
-Route::post('/upload', [UploadFileController::class, 'upload']);
+/*
+|---------------------------------------------------------------
+| Загрузка изображений
+|---------------------------------------------------------------
+*/
+Route::post('/upload', [\App\Http\Controllers\UploadImageController::class, 'upload']);
 
 
 /*
@@ -225,7 +214,7 @@ Route::post('/upload', [UploadFileController::class, 'upload']);
 | Разделы
 |---------------------------------------------------------------
 */
-Route::controller(SectionsController::class)
+Route::controller(\App\Http\Controllers\SectionsController::class)
     ->prefix('sections')
     ->name('sections.')
     ->group(callback: function () {
@@ -264,7 +253,7 @@ Route::controller(SectionsController::class)
 | Избранное
 |-------------------------------------------------------------
 */
-Route::controller(FavoritesController::class)
+Route::controller(\App\Http\Controllers\FavoritesController::class)
     ->prefix('favorites')
     ->name('favorites.')
     ->group(callback: function () {
@@ -288,7 +277,7 @@ Route::controller(FavoritesController::class)
 | Лайки
 |-------------------------------------------------------------
 */
-Route::controller(LikesController::class)
+Route::controller(\App\Http\Controllers\LikesController::class)
     ->prefix('likes')
     ->name('likes.')
     ->group(callback: function () {

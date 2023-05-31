@@ -7,7 +7,7 @@ use App\Models\Post;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
-class FavoritesController extends Controller {
+class FavoritesController extends BaseController {
     /**
      * Добавление или удаление элемента из избранного
      */
@@ -19,10 +19,7 @@ class FavoritesController extends Controller {
         ]);
         // Прокидываем ошибки, если данные не прошли валидацию
         if ($validator->fails()) {
-            return response()->json([
-                'status' => config('app.error_status'),
-                'message' => $validator->errors()->all()
-            ], config('app.error_status'));
+            return $this->validationErrorResponse($validator);
         }
 
         // Получаем пост по id

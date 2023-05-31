@@ -9,7 +9,7 @@ use App\Models\Post;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
-class CommentsController extends Controller {
+class CommentsController extends BaseController {
     /**
      * Создание комментария
      */
@@ -22,10 +22,7 @@ class CommentsController extends Controller {
         ]);
         // Прокидываем ошибки, если данные не прошли валидацию
         if ($validator->fails()) {
-            return response()->json([
-                'status' => config('app.error_status'),
-                'message' => $validator->errors()->all()
-            ], config('app.error_status'));
+            return $this->validationErrorResponse($validator);
         }
 
         // Проверяем есть ли пост
@@ -62,10 +59,7 @@ class CommentsController extends Controller {
         ]);
         // Прокидываем ошибки, если данные не прошли валидацию
         if ($validator->fails()) {
-            return response()->json([
-                'status' => config('app.error_status'),
-                'message' => $validator->errors()->all()
-            ], config('app.error_status'));
+            return $this->validationErrorResponse($validator);
         }
 
         // Получаем только те комментарии, которые являются родителями
@@ -131,10 +125,7 @@ class CommentsController extends Controller {
         ]);
         // Прокидываем ошибки, если данные не прошли валидацию
         if ($validator->fails()) {
-            return response()->json([
-                'status' => config('app.error_status'),
-                'message' => $validator->errors()->all()
-            ], config('app.error_status'));
+            return $this->validationErrorResponse($validator);
         }
 
         // Обновляем комментарий

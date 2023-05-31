@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
-class UsersController extends Controller {
+class UsersController extends BaseController {
 
     /**
      * Получение всех пользователей
@@ -30,10 +30,7 @@ class UsersController extends Controller {
         ]);
         // Прокидываем ошибки, если данные не прошли валидацию
         if ($validator->fails()) {
-            return response()->json([
-                'status' => config('app.error_status'),
-                'message' => $validator->errors()->all()
-            ], config('app.error_status'));
+            return $this->validationErrorResponse($validator);
         }
 
         // Получаем пользователя
@@ -66,17 +63,14 @@ class UsersController extends Controller {
         ]);
         // Прокидываем ошибки, если данные не прошли валидацию
         if ($validator->fails()) {
-            return response()->json([
-                'status' => config('app.error_status'),
-                'message' => $validator->errors()->all()
-            ], config('app.error_status'));
+            return $this->validationErrorResponse($validator);
         }
 
         // Получаем пользователя
         $user = $req->user();
 
         // Экземляр конроллера для загрузки файлов
-        $uploadController = new UploadFileController();
+        $uploadController = new UploadImageController();
         // Создаем запрос с путями для загрузки
         $uploadReq = new Request([
             'image' => $req->avatar,
@@ -108,10 +102,7 @@ class UsersController extends Controller {
         ]);
         // Прокидываем ошибки, если данные не прошли валидацию
         if ($validator->fails()) {
-            return response()->json([
-                'status' => config('app.error_status'),
-                'message' => $validator->errors()->all()
-            ], config('app.error_status'));
+            return $this->validationErrorResponse($validator);
         }
 
         // Получаем пользователя

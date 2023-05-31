@@ -6,7 +6,7 @@ use App\Mail\TestMail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 
-class MailController extends Controller {
+class MailController extends BaseController {
     public function sendEmail(Request $request) {
         $data = [
             'subject' => 'Test Title',

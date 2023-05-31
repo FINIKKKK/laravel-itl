@@ -8,7 +8,7 @@ use App\Models\Section;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
-class SectionsController extends Controller {
+class SectionsController extends BaseController {
     /**
      * Создание раздела
      */
@@ -31,10 +31,7 @@ class SectionsController extends Controller {
         ]);
         // Прокидываем ошибки, если данные не прошли валидацию
         if ($validator->fails()) {
-            return response()->json([
-                'status' => config('app.error_status'),
-                'message' => $validator->errors()->all()
-            ], config('app.error_status'));
+            return $this->validationErrorResponse($validator);
         }
 
         // Создаем раздел (касты)
@@ -63,10 +60,7 @@ class SectionsController extends Controller {
         ]);
         // Прокидываем ошибки, если данные не прошли валидацию
         if ($validator->fails()) {
-            return response()->json([
-                'status' => config('app.error_status'),
-                'message' => $validator->errors()->all()
-            ], config('app.error_status'));
+            return $this->validationErrorResponse($validator);
         }
 
         // Получаем список разделов только родительские
@@ -139,10 +133,7 @@ class SectionsController extends Controller {
         ]);
         // Прокидываем ошибки, если данные не прошли валидацию
         if ($validator->fails()) {
-            return response()->json([
-                'status' => config('app.error_status'),
-                'message' => $validator->errors()->all()
-            ], config('app.error_status'));
+            return $this->validationErrorResponse($validator);
         }
 
         // Обновляем раздел

@@ -9,7 +9,7 @@ use App\Models\Post;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
-class LikesController extends Controller {
+class LikesController extends BaseController {
     /**
      * Добавление или убрать лайк
      */
@@ -22,10 +22,7 @@ class LikesController extends Controller {
 
         // Прокидываем ошибки, если данные не прошли валидацию
         if ($validator->fails()) {
-            return response()->json([
-                'status' => config('app.error_status'),
-                'message' => $validator->errors()->all()
-            ], config('app.error_status'));
+            return $this->validationErrorResponse($validator);
         }
 
         // Получаем по id
