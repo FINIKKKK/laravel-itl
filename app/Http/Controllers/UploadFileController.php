@@ -29,20 +29,33 @@ class UploadFileController extends Controller {
             // Путь для загрузки изображений
             $path = config('database.connections.pgsql.host');
             // Путь для загрузки изображений
-            $imgPath = config('app.img_path');
+            $imgPath = config('app.path.img.main');
 
             // Менять пути, взависимости от типа изображения
-            if ($req->path) {
-                $imgPath = $req->path;
+            if ($req->get('path')) {
+                $imgPath = $req->get('path');
             }
 
-            // Генерируем название изображения
-            $imageName = time() . '.' . $image->getClientOriginalExtension();
-            // Загружаем изображение в папку
-            $image->move(public_path($imgPath), $imageName);
+            // Проверяем размер изображения
+            $dimensions = getimagesize($image);
+            $width = $dimensions[0];
+            $height = $dimensions[1];
 
-            // Возвращаем полный путь изображения
-            return "http://{$path}:8000/{$imgPath}/{$imageName}";
+            if ($width >= 256 && $height >= 256) {
+                // Изображение соответствует требуемому размеру
+                // Выполняем код для сохранения изображения
+                //                $image->store('images'); // Пример сохранения в директорию 'public/images'
+
+                // Генерируем название изображения
+                $imageName = time() . '.' . $image->getClientOriginalExtension();
+                // Загружаем изображение в папку
+                $image->move(public_path($imgPath), $imageName);
+
+                // Возвращаем полный путь изображения
+                return "http://{$path}:8000/{$imgPath}/{$imageName}";
+            } else {
+                return ["Изображение должно быть не менее 256x256 пикселей"];
+            }
         } else {
             // Прокидываем ошибку, если изображение не было загружено
             return response()->json([

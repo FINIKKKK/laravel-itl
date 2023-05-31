@@ -39,19 +39,6 @@ class UsersController extends Controller {
         // Получаем пользователя
         $user = $req->user();
 
-        // Если нужно, то обновляем аватар
-        if ($req->get('avatar')) {
-            // Экземляр конроллера для загрузки файлов
-            $uploadController = new UploadFileController();
-            // Создаем запрос с путями для загрузки
-            $uploadReq = new Request([
-                'image' => $req->get('avatar'),
-                'path' => config('app.img_path_avatar')
-            ]);
-            // Загружаем файл и получаем его путь
-            $avatarUrl = $uploadController->upload($uploadReq);
-        }
-
         // Обновляем только те элементы, которые приходят
         $fields = [
             'firstName',
@@ -59,7 +46,6 @@ class UsersController extends Controller {
             'email',
         ];
         $data = $req->only($fields);
-        $data['avatar'] = $avatarUrl;
         $user->fill($data);
         $user->save();
 
@@ -67,6 +53,47 @@ class UsersController extends Controller {
         return response()->json([
             'status' => config('app.success_status'),
             'data' => $user,
+        ], config('app.success_status'));
+    }
+
+    /**
+     * Обновление аватарки пользователя
+     */
+    public function updateAvatar(Request $req) {
+        // Проверяем данные запроса
+        $validator = Validator::make($req->all(), [
+            'avatar' => 'required|image|mimes:png,jpg,jpeg|max:2048',
+        ]);
+        // Прокидываем ошибки, если данные не прошли валидацию
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => config('app.error_status'),
+                'message' => $validator->errors()->all()
+            ], config('app.error_status'));
+        }
+
+        // Получаем пользователя
+        $user = $req->user();
+
+        // Экземляр конроллера для загрузки файлов
+        $uploadController = new UploadFileController();
+        // Создаем запрос с путями для загрузки
+        $uploadReq = new Request([
+            'image' => $req->avatar,
+            'path' => config('app.path.img.avatar')
+        ]);
+        // Загружаем файл и получаем его путь
+        $avatarUrl = $uploadController->upload($uploadReq);
+
+        // Обновляем аватарку у пользователя
+        $user->update([
+            'avatar' => $avatarUrl
+        ]);
+
+        // Возвращаем обновленный пост
+        return response()->json([
+            'status' => config('app.success_status'),
+            'data' => $avatarUrl,
         ], config('app.success_status'));
     }
 

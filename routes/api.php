@@ -66,7 +66,12 @@ Route::controller(UsersController::class)
             /**
              * Обновление данных пользователя
              */
-            Route::name('updateUserData')->post('/', 'updateUserData');
+            Route::name('updateUserData')->patch('/', 'updateUserData');
+
+            /**
+             * Обновление аватарки пользователяя
+             */
+            Route::name('updateAvatar')->post('/avatar', 'updateAvatar');
 
             /**
              * Обновление пароля пользователя

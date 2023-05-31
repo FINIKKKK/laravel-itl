@@ -47,11 +47,11 @@ class AuthController extends BaseController {
 
         // Создаем пользователя
         $user = User::create([
-            'firstName' => $req->firstName,
-            'lastName' => $req->lastName,
-            'email' => $req->email,
+            'firstName' => $req->get('firstName'),
+            'lastName' => $req->get('lastName'),
+            'email' => $req->get('email'),
             // Зашифровываем пароль
-            'password' => Hash::make($req->password),
+            'password' => Hash::make($req->get('password')),
         ]);
         // Получаем токен
         $token = auth()->login($user);
@@ -89,19 +89,23 @@ class AuthController extends BaseController {
             ], config('app.error_status'));
         }
 
-        // Получаем данные пользователя
-        $user = auth()->user();
-
         // Получаем компании пользователя
-        //        $companies = Company::where('user_id', $user->id)->get();
-        $user = User::with('companies')->find($user->id);
-//        $companies = $user->companies;
+        $user = User::find($req->user()->id);
+        $user->makeHidden('companies');
+
+        // Добавляем поле - количество пользователей в компании
+        $companies = $user->companies->map(function ($company) {
+            $company->users_count = $company->users->count();
+            unset($company->users);
+            return $company;
+        });
 
         // Возвращаем данные пользователя и его токен
         return response()->json([
             'status' => config('app.success_status'),
             'data' => [
                 'user' => $user,
+                'companies' => $companies,
                 'token' => [
                     'access_token' => $token,
                     'token_type' => 'bearer',
@@ -110,6 +114,32 @@ class AuthController extends BaseController {
             ]
         ]);
     }
+
+    /**
+     * Получение информации о текущем пользователе
+     */
+    public function me(Request $req) {
+        // Получаем компании пользователя
+        $user = User::find($req->user()->id);
+        $user->makeHidden('companies');
+
+        // Добавляем поле - количество пользователей в компании
+        $companies = $user->companies->map(function ($company) {
+            $company->users_count = $company->users->count();
+            unset($company->users);
+            return $company;
+        });
+
+        // Возвращение информации о текущем пользователе и его компаний
+        return response()->json([
+            'status' => config('app.success_status'),
+            'data' => [
+                'user' => $user,
+                'companies' => $companies,
+            ],
+        ], config('app.success_status'));
+    }
+
 
     /**
      * Выход из аккаунта
@@ -122,26 +152,6 @@ class AuthController extends BaseController {
         return response()->json([
             'status' => config('app.success_status'),
             'message' => ['Успешный выход из аккаунта'],
-        ], config('app.success_status'));
-    }
-
-    /**
-     * Получение информации о текущем пользователе
-     */
-    public function me() {
-        // Получение текущего пользователя
-        $user = auth()->user();
-
-        // Получение компаний текущего пользователя
-        $companies = Company::where('user_id', $user->id)->get();
-
-        // Возвращение информации о текущем пользователе и его компаний
-        return response()->json([
-            'status' => config('app.success_status'),
-            'data' => [
-                'user' => $user,
-                'companies' => $companies,
-            ],
         ], config('app.success_status'));
     }
 }
