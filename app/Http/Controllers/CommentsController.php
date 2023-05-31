@@ -117,7 +117,9 @@ class CommentsController extends BaseController {
         }
 
         // Обновляем комментарий
-        $comment->update($req->all());
+        $comment->update([
+            'text' => $req->get('text'),
+        ]);
 
         // Возвращаем обновленный комментарий
         return $this->response($comment, false, false);

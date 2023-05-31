@@ -28,7 +28,7 @@ class Comment extends Model {
         return $this->belongsTo(Comment::class);
     }
 
-    //
+    // Лайки у этого комментария
     public function likes() {
         return $this->morphMany(Like::class, 'likeable');
     }

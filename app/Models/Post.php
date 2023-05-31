@@ -33,11 +33,13 @@ class Post extends Model {
         return $this->hasMany(Comment::class);
     }
 
-    public function favorites() {
+    // В избранном ли пост
+    public function favorited() {
         return $this->morphToMany(User::class, 'favoritable', 'favorites');
     }
 
-    public function likes() {
+    // Лайкнут ли пост
+    public function liked() {
         return $this->morphToMany(User::class, 'likeable', 'likes');
     }
 }

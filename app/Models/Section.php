@@ -35,7 +35,8 @@ class Section extends Model {
         return $this->belongsTo(Section::class, 'parent_id');
     }
 
-    public function favorites() {
+    // В избранном ли раздел
+    public function favorited() {
         return $this->morphMany(Favorite::class, 'favoritable');
     }
 }

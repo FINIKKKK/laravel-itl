@@ -87,13 +87,13 @@ class SectionsController extends BaseController {
         // Получаем дочерние разделы
         $childSections = Section::where('parent_id', $id)->get();
         // Получаем дочерние посты
-        $posts = Post::where('section_id', $id)->get();
+        $posts = Post::where('section_id', $id)->where('onModeration', false)->get();
+
         // Создаем поле data и прокидываем данные
         $section->data = [
             'sections' => $childSections,
             'posts' => $posts,
         ];
-
         // Возвращаем раздел
         return $this->response($section, false, false);
     }
@@ -119,7 +119,10 @@ class SectionsController extends BaseController {
         }
 
         // Обновляем раздел
-        $section->update($req->all());
+        $section->update([
+            'title' => $req->get('title'),
+            'body' => $req->get('body'),
+        ]);
 
         // Возвращаем обновленный раздел
         return $this->response($section, false, false);

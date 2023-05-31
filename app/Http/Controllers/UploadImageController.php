@@ -20,8 +20,10 @@ class UploadImageController extends BaseController {
             return $this->validationErrors($validator);
         }
 
-        // Загружаем изображение
+        // Получаем изображение
         $image = $req->image;
+
+        // Проверяем изображение
         if ($image->isValid()) {
             // Путь для загрузки изображений
             $path = config('database.connections.pgsql.host');

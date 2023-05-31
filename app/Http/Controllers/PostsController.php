@@ -35,15 +35,16 @@ class PostsController extends BaseController {
             return $this->response('Компания не найдена', true, true);
         }
 
-        // Находим компанию пользователя
-        $company = $req->user()->companies()->find($req->get('company_id'));
-        $role = $company->pivot->role_id;
-
         // Проверяем есть ли раздел
         $section = Section::find($req->get('section_id'));
         if (!$section) {
             return $this->response('Раздел не найден', true, true);
         }
+
+        // Находим компанию пользователя
+        $company = $req->user()->companies()->find($req->get('company_id'));
+        // Получаем его роль в этой компании
+        $role = $company->pivot->role_id;
 
         // Создаем пост
         $post = Post::create([
@@ -54,6 +55,7 @@ class PostsController extends BaseController {
             'company_id' => $req->get('company_id'),
         ]);
 
+        // Если он "Модератор", то сразу публикуем
         if ($role === 1) {
             $post->onModeration = false;
             $post->save();
@@ -80,6 +82,7 @@ class PostsController extends BaseController {
         // + Без поля body
         // + Сортируем по дате (сначала новые)
         $posts = Post::where('section_id', $req->get('section_id'))
+            ->where('onModeration', false)
             ->without('body')
             ->orderBy('created_at', 'desc')
             ->get();
@@ -101,8 +104,17 @@ class PostsController extends BaseController {
             return $this->validationErrors($validator);
         }
 
-        // Получаем пользователя
-        $posts = $req->user()->posts()->where('company_id', $req->get('company_id'))->get();
+        // Проверяем есть ли компания
+        $company = Company::find($req->get('company_id'));
+        if (!$company) {
+            return $this->response('Компания не найдена', true, true);
+        }
+
+        // Получаем все посты пользователя
+        $posts = $req->user()->posts()
+            ->where('company_id', $req->get('company_id'))
+            ->orderBy('created_at', 'desc')
+            ->get();
 
         // Возвращаем обновленный пост
         return $this->response($posts, false, false);
@@ -121,15 +133,21 @@ class PostsController extends BaseController {
             return $this->validationErrors($validator);
         }
 
-        // Получаем пользователя
+        // Проверяем есть ли компания
         $company = Company::find($req->get('company_id'));
+        if (!$company) {
+            return $this->response('Компания не найдена', true, true);
+        }
 
-        $posts = $company->posts()->where('onModeration', true)->get();
+        // Получаем все посты на модерации
+        $posts = $company->posts()
+            ->where('onModeration', true)
+            ->orderBy('created_at', 'desc')
+            ->get();
 
         // Возвращаем обновленный пост
         return $this->response($posts, false, false);
     }
-
 
     /**
      * Получение одного поста по id
@@ -214,7 +232,29 @@ class PostsController extends BaseController {
         }
 
         // Обновляем пост
-        $post->update($req->all());
+        $post->update([
+            'title' => $req->get('title'),
+            'body' => $req->get('body'),
+        ]);
+
+        // Возвращаем обновленный пост
+        return $this->response($post, false, false);
+    }
+
+    /**
+     * Убираем пост с модерации
+     */
+    public function removeFromModeration(Request $req, $id) {
+        // Проверяем есть ли пост
+        $post = Post::find($id);
+        if (!$post) {
+            return $this->response('Пост не найден', true, true);
+        }
+
+        // Убираем пост с модерации
+        $post->update([
+            'onModeration' => false,
+        ]);
 
         // Возвращаем обновленный пост
         return $this->response($post, false, false);

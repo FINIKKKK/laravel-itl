@@ -105,9 +105,14 @@ Route::controller(\App\Http\Controllers\CompaniesController::class)
                 Route::name('getUsers')->get('/{id}', 'getUsers');
 
                 /**
+                 * Изменение компании
+                 */
+                Route::name('update')->patch('/{id}', 'update');
+
+                /**
                  * Изменение роли у пользователя в компании
                  */
-                Route::name('changeRoleUser')->patch('/role', 'changeRoleUser');
+                Route::name('changeRoleUser')->patch('/{id}/role', 'changeRoleUser');
 
                 /**
                  * Удаление пользователя из компании
@@ -158,6 +163,11 @@ Route::controller(\App\Http\Controllers\PostsController::class)
              * Обновление поста по id
              */
             Route::name('update')->patch('/{id}', 'update');
+
+            /**
+             * Убираем пост с модерации
+             */
+            Route::name('removeFromModeration')->patch('/{id}/moderation', 'removeFromModeration');
 
             /**
              * Удаление поста по id
@@ -293,5 +303,21 @@ Route::controller(\App\Http\Controllers\LikesController::class)
              */
             Route::name('getAll')->get('/', 'getAll');
         });
+    });
+
+
+/*
+|--------------------------------------------------------------------------
+| Роли
+|--------------------------------------------------------------------------
+*/
+Route::controller(\App\Http\Controllers\RolesController::class)
+    ->prefix('roles')
+    ->name('roles.')
+    ->group(callback: function () {
+        /**
+         * Получение всех ролей
+         */
+        Route::name('getAll')->get('/', 'getAll');
     });
 

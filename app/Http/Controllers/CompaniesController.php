@@ -141,14 +141,52 @@ class CompaniesController extends BaseController {
     }
 
     /**
+     * Изменение компании
+     */
+    public function update($id, Request $req) {
+        // Проверяем есть ли компания
+        $company = Company::find($id);
+        if (!$company) {
+            return $this->response('Компания не найдена', true, true);
+        }
+
+        // Проверяем данные запроса
+        $validator = Validator::make($req->all(), [
+            'name' => 'string|min:2|max:150|unique:companies,name',
+            'url_address' => 'string|unique:companies,url_address',
+        ]);
+        // Прокидываем ошибки, если данные не прошли валидацию
+        if ($validator->fails()) {
+            return $this->validationErrors($validator);
+        }
+
+        // Создаем slug
+        $slug = Str::slug($req->get('name'));
+
+        // Обновляем компанию
+        $company->update([
+            'name' => $req->get('name'),
+            'url_address' => $req->get('url_address'),
+        ]);
+
+        // Возвращаем сообщение об успешном изменении роли пользователя
+        return $this->response($company, false, false);
+    }
+
+    /**
      * Изменение роли у пользователя в компании
      */
-    public function changeRoleUser(Request $req) {
+    public function changeRoleUser($id, Request $req) {
+        // Проверяем есть ли компания
+        $company = Company::find($id);
+        if (!$company) {
+            return $this->response('Компания не найдена', true, true);
+        }
+
         // Проверяем данные запроса
         $validator = Validator::make($req->all(), [
             'role_id' => 'required|integer',
             'user_id' => 'required|integer',
-            'company_id' => 'required|integer',
         ]);
         // Прокидываем ошибки, если данные не прошли валидацию
         if ($validator->fails()) {
@@ -165,12 +203,6 @@ class CompaniesController extends BaseController {
         $user = User::find($req->get('user_id'));
         if (!$user) {
             return $this->response('Пользователь не найден', true, true);
-        }
-
-        // Проверяем есть ли компания
-        $company = Company::find($req->get('company_id'));
-        if (!$company) {
-            return $this->response('Компания не найдена', true, true);
         }
 
         // Обновляем роль пользователя для данной компании

@@ -12,8 +12,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 
-class User extends Authenticatable implements JWTSubject
-{
+class User extends Authenticatable implements JWTSubject {
     use HasApiTokens, HasFactory, Notifiable;
 
     protected $guarded = false;
@@ -40,18 +39,22 @@ class User extends Authenticatable implements JWTSubject
         return [];
     }
 
-    public function role() {
-        return $this->hasOne(Role::class);
-    }
-
+    // Компании пользователя
     public function companies() {
         return $this->belongsToMany(Company::class, 'user_company', 'user_id', 'company_id')->withPivot('role_id');
     }
 
+    // Разделы пользователя
+    public function sections() {
+        return $this->hasMany(Section::class);
+    }
+
+    // Посты пользователя
     public function posts() {
         return $this->hasMany(Post::class);
     }
 
+    // Комментарии пользователя
     public function comments() {
         return $this->hasMany(Comment::class);
     }

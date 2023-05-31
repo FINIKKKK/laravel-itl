@@ -16,16 +16,15 @@ class Company extends Model {
         return $this->belongsTo(User::class);
     }
 
-    // Создатель компании
+    // Разделы в этой компании
     public function sections() {
-        return $this->belongsToMany(Section::class, 'sections', 'section_id');
+        return $this->hasMany(Section::class);
     }
 
-    // Создатель компании
+    // Посты в этой компании
     public function posts() {
         return $this->hasMany(Post::class);
     }
-
 
     // Пользователи в компании
     public function users() {

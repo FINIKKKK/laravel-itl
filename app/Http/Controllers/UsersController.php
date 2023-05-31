@@ -17,8 +17,7 @@ class UsersController extends BaseController {
         $validator = Validator::make($req->all(), [
             'firstName' => 'string',
             'lastName' => 'string',
-            'email' => 'string|max:250|unique:users,email',
-            'avatar' => 'image|mimes:png,jpg,jpeg|max:2048',
+            'email' => 'email|max:250|unique:users,email',
         ]);
         // Прокидываем ошибки, если данные не прошли валидацию
         if ($validator->fails()) {
@@ -29,14 +28,11 @@ class UsersController extends BaseController {
         $user = $req->user();
 
         // Обновляем только те элементы, которые приходят
-        $fields = [
-            'firstName',
-            'lastName',
-            'email',
-        ];
-        $data = $req->only($fields);
-        $user->fill($data);
-        $user->save();
+        $user->update([
+            'firstName' => $req->get('firstName'),
+            'lastName' => $req->get('lastName'),
+            'email' => $req->get('email'),
+        ]);
 
         // Возвращаем обновленный пост
         return $this->response($user, false, false);
