@@ -19,36 +19,34 @@ class LikesController extends BaseController {
             'item_id' => 'required|integer',
             'type' => 'required|string|in:post,section,comment'
         ]);
-
         // Прокидываем ошибки, если данные не прошли валидацию
         if ($validator->fails()) {
             return $this->validationErrors($validator);
         }
 
-        // Получаем по id
-        $entity = (ucfirst($req->get('type')))::whereId($req->get('item_id'))->first();
-
-        // Проверяем есть ли пост
-        if (!$entity) {
+        // Проверяем есть ли элемент
+        $type = "App\\Models\\" . ucfirst($req->get('type'));
+        $elem = $type::whereId($req->get('item_id'))->first();
+        if (!$elem) {
             return $this->response('Элемент не найден', true, true);
         }
 
-        // Проверяем, существует ли уже элемент в избранном пользователя
+        // Создаем или получаем элемент
         $like = Like::firstOrCreate([
             'user_id' => $req->user()->id,
-            'likeable_id' => $entity->id,
-            'likeable_type' => $entity::class
+            'likeable_id' => $elem->id,
+            'likeable_type' => $elem::class
         ]);
 
         // Если есть, то удаляем
-        if (!$like->wasRecentlyCreated()) {
+        if (!$like->wasRecentlyCreated) {
             $like->delete();
-
-            return $this->response('Элемент удален из понравившееся', false, true);
+            // Возвращаем успешное удаление
+            return $this->response(false, false, false);
         }
 
-        // Возвращаем список элементов
-        return $this->response('Элемент добавлен в понравившееся', false, true);
+        // Возвращаем успешное добавление
+        return $this->response(true, false, false);
     }
 
     /**

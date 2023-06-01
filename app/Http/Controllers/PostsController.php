@@ -156,15 +156,20 @@ class PostsController extends BaseController {
         // Получаем пользователя
         $user = $req->user();
 
-        // Получаем пост по id и привязываем информацию о пользователе и разделе
-        $post = Post::with('author:id,firstName,lastName')->with([
+        // Получаем пост и привязываем информацию о пользователе и разделе
+        $post = Post::with([
+            'author:id,firstName,lastName',
             'section:id,title',
-            //            'likes' => function ($query) use ($user) {
-            //                $query->where('users.id', $user->id);
-            //            },
-            //            'favorites' => function ($query) use ($user) {
-            //                $query->where('users.id', $user->id);
-            //            }
+            'liked' => function ($query) use ($user) {
+                if ($user) {
+                    $query->where('users.id', $user->id);
+                }
+            },
+            'favorited' => function ($query) use ($user) {
+                if ($user) {
+                    $query->where('users.id', $user->id);
+                }
+            }
         ])->find($id);
         // Проверяем есть ли такой пост
         if (!$post) {
@@ -174,38 +179,13 @@ class PostsController extends BaseController {
         // Конвертируем body у поста из строки в массив
         $post->body = json_decode($post->body);
 
-        // Если пользователь авторизован
-        //        if ($user) {
-        //            // Проверяем, существует ли пост в избранном пользователя
-        //            $favorite = Favorite::where('user_id', $user->id)
-        //                ->where('favoritable_id', $post->id)
-        //                ->where('favoritable_type', Post::class)
-        //                ->first();
-        //            // Если есть, то помечаем поле, как отмеченное
-        //            if ($favorite) {
-        //                $post->isFavorite = true;
-        //            } // Если нету, то помечаем поле, как неотмеченное
-        //            else {
-        //                $post->isFavorite = false;
-        //            }
-        //
-        //            // Проверяем, есть ли лайк на посте
-        //            $like = Like::where('user_id', $user->id)
-        //                ->where('likeable_id', $post->id)
-        //                ->where('likeable_type', Post::class)
-        //                ->first();
-        //            // Если есть, то помечаем поле, как отмеченное
-        //            if ($like) {
-        //                $post->isLike = true;
-        //            } // Если нету, то помечаем поле, как неотмеченное
-        //            else {
-        //                $post->isLike = false;
-        //            }
-        //        } // Если пользователь неавторизован
-        //        else {
-        //        }
-        $post->isFavorite = false;
-        $post->isLike = false;
+        // Проверяем, есть ли лайк на посте
+        $post->isLike = ($user && $post->liked->count()) ? true : false;
+        // Проверяем, существует ли пост в избранном пользователя
+        $post->isFavorite = ($user && $post->favorited->count()) ? true : false;
+
+        // Убираем поля liked и favorited
+        $post->makeHidden(['liked', 'favorited']);
 
         // Возвращаем пост
         return $this->response($post, false, false);

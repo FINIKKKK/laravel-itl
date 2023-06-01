@@ -37,7 +37,7 @@ class CommentsController extends BaseController {
             'post_id' => $req->get('post_id'),
             'user_id' => $req->user()->id,
             'parent_comment_id' => $req->get('parent_id'),
-        ])->load('user');
+        ])->load('author');
 
         // Возвращаем комментарий
         return $this->response($comment, false, false);
@@ -56,42 +56,43 @@ class CommentsController extends BaseController {
             return $this->validationErrors($validator);
         }
 
+        // Получаем пользователя
+        $user = $req->user();
+
         // Получаем только те комментарии, которые являются родителями
         // + Определенного поста
         // + Привязываем информацио об авторе
         // + Сортируем по дате (сначала новые)
         $comments = Comment::whereNull('parent_comment_id')
             ->where('post_id', $req->get('post_id'))
-            ->with('user')
+            ->with([
+                'author:id,firstName,lastName,avatar',
+                'liked' => function ($query) use ($user) {
+                    if ($user) {
+                        $query->where('users.id', $user->id);
+                    }
+                },
+            ])
             ->orderBy('created_at', 'desc')
             ->get();
 
-        // Получаем пользователя
-        $user = $req->user();
-
-        // Пробегаймся по комментриям, и добавляем к какждому дочерние комментарии
+        // Пробегаймся по комментриям, и добавляем к каждому дочерние комментарии
         foreach ($comments as $comment) {
-            $children = Comment::where('parent_comment_id', $comment->id)->with('user')->get();
+            $children = Comment::where('parent_comment_id', $comment->id)->get();
             $comment->children = $children;
-            // Если пользователь авторизован
-            if ($user) {
-                // Проверяем, есть ли лайк на посте
-                $like = Like::where('user_id', $user->id)
-                    ->where('likeable_id', $comment->id)
-                    ->where('likeable_type', Comment::class)
-                    ->first();
-                // Если есть, то помечаем поле, как отмеченное
-                if ($like) {
-                    $comment->isLike = true;
-                } // Если нету, то помечаем поле, как неотмеченное
-                else {
-                    $comment->isLike = false;
-                }
-            } // Если пользователь неавторизован
-            else {
-                $comment->isFavorite = false;
-            }
+
+            // Проверяем, есть ли лайк на посте
+            $comment->isLike = ($user && $comment->liked->count()) ? true : false;
+
+            // Добавляем поле количество лайков
+            $likesCount = Like::where('likeable_id', $comment->id)
+                ->where('likeable_type', $comment::class)
+                ->count();
+            $comment->likesCount = $likesCount;
         }
+
+        // Убираем поле likes
+        $comments->makeHidden(['liked']);
 
         // Возвращаем комментарии
         return $this->response($comments, false, false);

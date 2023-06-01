@@ -22,34 +22,30 @@ class FavoritesController extends BaseController {
             return $this->validationErrors($validator);
         }
 
-        // Получаем пост по id
-        $post = Post::find($req->get('item_id'));
-        // Проверяем есть ли пост
-        if (!$post) {
-            return $this->response('Пост не найден', true, true);
+        // Проверяем есть ли элемент
+        $type = "App\\Models\\" . ucfirst($req->get('type'));
+        $elem = $type::whereId($req->get('item_id'))->first();
+        if (!$elem) {
+            return $this->response('Элемент не найден', true, true);
         }
 
-        // Проверяем, существует ли уже элемент в избранном пользователя
-        $favorite = Favorite::where('user_id', $req->user()->id)
-            ->where('favoritable_id', $post->id)
-            ->where('favoritable_type', Post::class)
-            ->first();
+        // Создаем или получаем элемент
+        $favorite = Favorite::firstOrCreate([
+            'user_id' => $req->user()->id,
+            'favoritable_id' => $elem->id,
+            'favoritable_type' => $elem::class
+        ]);
+
 
         // Если есть, то удаляем
-        if ($favorite) {
+        if (!$favorite->wasRecentlyCreated) {
             $favorite->delete();
-            return $this->response('Элемент удален из избранного', false, true);
-        } // Если нет, то добавляем
-        else {
-            $favorite = Favorite::create([
-                'user_id' => $req->user()->id,
-                'favoritable_id' => $post->id,
-                'favoritable_type' => Post::class
-            ]);
+            // Возвращаем успешное удаление
+            return $this->response(false, false, false);
         }
 
-        // Возвращаем список элементов
-        return $this->response('Элемент добавлен в избранное', false, true);
+        // Возвращаем успешное добавление
+        return $this->response(true, false, false);
     }
 
     /**
@@ -69,19 +65,21 @@ class FavoritesController extends BaseController {
             $favorite->type = $type;
         });
 
+        // Группируем элементы по компании
         $groupedFavorites = $favorites->groupBy(function ($favorite) {
             return $favorite->favoritable->company->name;
         });
 
+        // Сортируем по дате добавления в избранное
         $sortedFavorites = $groupedFavorites->sortByDesc(function ($favorites) {
             return $favorites->max('created_at');
         });
 
+        // Приводи всё к одному виду
         $result = $sortedFavorites->map(function ($favorites, $companyName) {
             $sortedFavorites = $favorites->sortByDesc(function ($favorite) {
                 return $favorite->created_at;
             });
-
             return [
                 'id' => $favorites->first()->favoritable->company->id,
                 'name' => $companyName,

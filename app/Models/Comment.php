@@ -15,7 +15,7 @@ class Comment extends Model {
 
     // Автор комментария
     public function author() {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     // Пост, у которого был оставлен этот комментарий
@@ -29,7 +29,7 @@ class Comment extends Model {
     }
 
     // Лайки у этого комментария
-    public function likes() {
-        return $this->morphMany(Like::class, 'likeable');
+    public function liked() {
+        return $this->morphToMany(User::class, 'likeable', 'likes');
     }
 }
