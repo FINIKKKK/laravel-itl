@@ -30,7 +30,7 @@ class PostsController extends BaseController {
         }
 
         // Проверяем есть ли компания
-        $company = Section::find($req->get('company_id'));
+        $company = Company::find($req->get('company_id'));
         if (!$company) {
             return $this->response('Компания не найдена', true, true);
         }
@@ -94,7 +94,7 @@ class PostsController extends BaseController {
     /**
      * Получение всех постов пользователя
      */
-    public function getMy(Request $req) {
+    public function getMine(Request $req) {
         // Проверяем данные запроса
         $validator = Validator::make($req->all(), [
             'company_id' => 'required|integer',

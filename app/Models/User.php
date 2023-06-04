@@ -39,6 +39,19 @@ class User extends Authenticatable implements JWTSubject {
         return [];
     }
 
+    public function hasRoleInCompany($roleIds, $companyId) {
+        return $this->companies()->where('company_id', $companyId)
+            ->wherePivotIn('role_id', $roleIds)
+            ->exists();
+    }
+
+    public function roles() {
+        return $this->belongsToMany(Role::class, 'user_company', 'user_id', 'role_id')
+            ->withPivot('company_id')
+            ->withTimestamps();
+    }
+
+
     // Компании пользователя
     public function companies() {
         return $this->belongsToMany(Company::class, 'user_company', 'user_id', 'company_id')->withPivot('role_id');

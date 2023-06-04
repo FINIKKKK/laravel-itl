@@ -51,21 +51,26 @@ class SectionsController extends BaseController {
         // Проверяем данные запроса
         $validator = Validator::make($req->all(), [
             'company_id' => 'required|integer',
+            'isParents' => ''
         ]);
         // Прокидываем ошибки, если данные не прошли валидацию
         if ($validator->fails()) {
             return $this->validationErrors($validator);
         }
 
-        // Получаем список разделов только родительские
+        // Получаем список разделов
         // + Определенной компании
         // + Без поля body
         // + Сортируем по дате (сначала новые)
-        $sections = Section::whereNull('parent_id')
-            ->where('company_id', $req->get('company_id'))
-            ->without('body')
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $sections = Section::where('company_id', $req->get('company_id'))
+            ->without('body')->orderBy('created_at', 'desc');
+
+
+        if ($req->get('isParents')) {
+            $sections = $sections->get();
+        } else {
+            $sections = $sections->whereNull('parent_id')->get();
+        }
 
         // Возвращаем список разделов
         return $this->response($sections, false, false);

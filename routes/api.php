@@ -94,10 +94,14 @@ Route::controller(\App\Http\Controllers\CompaniesController::class)
 
             // Группа маршрутов, связанных с пользователями компании
             Route::prefix('users')->name('users.')->group(function () {
-                /**
-                 * Добавление пользователя в компанию
-                 */
-                Route::name('addUser')->post('/', 'addUser');
+                Route::group(['middleware' => 'role:3', 'prefix' => 'companies/{company_id}'], function () {
+                    // Эти маршруты будут доступны только администраторам указанной компании
+                    /**
+                     * Добавление пользователя в компанию
+                     */
+                    Route::name('addUser')->post('/', 'addUser');
+                });
+
 
                 /**
                  * Получение всех пользователей компании
@@ -152,7 +156,7 @@ Route::controller(\App\Http\Controllers\PostsController::class)
             /**
              * Получение постов пользователя
              */
-            Route::name('getMy')->get('/get/my', 'getMy');
+            Route::name('getMine')->get('/get/my', 'getMine');
 
             /**
              * Получение постов, которые находяться на модерации

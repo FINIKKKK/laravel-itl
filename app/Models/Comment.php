@@ -24,8 +24,8 @@ class Comment extends Model {
     }
 
     // Родтельский комментарий, у которого был оставлен этот комментарий
-    public function parentComment() {
-        return $this->belongsTo(Comment::class);
+    public function replyUser() {
+        return $this->belongsTo(User::class);
     }
 
     // Лайки у этого комментария

@@ -77,9 +77,12 @@ class CompaniesController extends BaseController {
     /**
      * Получение компании по slug
      */
-    public function getOne($slug) {
+    public function getOne($slug, Request $req) {
+        // Получаем текущего пользователя
+        $user = $req->user();
+
         // Проверяем есть ли компанию
-        $company = Company::where('slug', $slug)->first();
+        $company = $user->companies()->where('slug', $slug)->first();
         if (!$company) {
             return $this->response('Компания не найдена', true, true);
         }

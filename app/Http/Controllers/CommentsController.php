@@ -6,6 +6,7 @@ use App\Models\Comment;
 use App\Models\Favorite;
 use App\Models\Like;
 use App\Models\Post;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -18,7 +19,7 @@ class CommentsController extends BaseController {
         $validator = Validator::make($req->all(), [
             'text' => 'required|string|min:5|max:250',
             'post_id' => 'required|integer',
-            'parent_id' => 'integer',
+            'replyUser' => 'integer',
         ]);
         // Прокидываем ошибки, если данные не прошли валидацию
         if ($validator->fails()) {
@@ -31,17 +32,23 @@ class CommentsController extends BaseController {
             return $this->response('Пост не найден', true, true);
         }
 
+        $replyUser = User::find($req->get('replyUser'));
+        if ($req->get('replyUser') && !$replyUser) {
+            return $this->response('Пользователь не найден', true, true);
+        }
+
         // Создаем комментарий и подгружаем информацию об авторе комментария
         $comment = Comment::create([
             'text' => $req->get('text'),
             'post_id' => $req->get('post_id'),
             'user_id' => $req->user()->id,
-            'parent_comment_id' => $req->get('parent_id'),
+            'reply_user_id' => $req->get('replyUser')
         ])->load('author');
 
         // Возвращаем комментарий
         return $this->response($comment, false, false);
     }
+
 
     /**
      * Получение всех комментариев определенного поста
@@ -63,8 +70,8 @@ class CommentsController extends BaseController {
         // + Определенного поста
         // + Привязываем информацио об авторе
         // + Сортируем по дате (сначала новые)
-        $comments = Comment::whereNull('parent_comment_id')
-            ->where('post_id', $req->get('post_id'))
+        $comments = Comment::where('post_id', $req->get('post_id'))
+            ->where('reply_user_id')
             ->with([
                 'author:id,firstName,lastName,avatar',
                 'liked' => function ($query) use ($user) {
@@ -76,11 +83,8 @@ class CommentsController extends BaseController {
             ->orderBy('created_at', 'desc')
             ->get();
 
-        // Пробегаймся по комментриям, и добавляем к каждому дочерние комментарии
+        // Пробегаймся по комментриям
         foreach ($comments as $comment) {
-            $children = Comment::where('parent_comment_id', $comment->id)->get();
-            $comment->children = $children;
-
             // Проверяем, есть ли лайк на посте
             $comment->isLike = ($user && $comment->liked->count()) ? true : false;
 
@@ -97,6 +101,7 @@ class CommentsController extends BaseController {
         // Возвращаем комментарии
         return $this->response($comments, false, false);
     }
+
 
     /**
      * Обновление комментария по id
@@ -125,6 +130,7 @@ class CommentsController extends BaseController {
         // Возвращаем обновленный комментарий
         return $this->response($comment, false, false);
     }
+
 
     /**
      * Удаление комментария по id
